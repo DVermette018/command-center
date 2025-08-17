@@ -1,0 +1,66 @@
+{
+  "name": "nuxt-ui-pro-template-dashboard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck",
+    "seed:questions": "ts-node prisma/seed-questions.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/vue": "^2.0.14",
+    "@appwrite.io/pink-icons": "^1.0.0",
+    "@iconify-json/lucide": "^1.2.53",
+    "@iconify-json/simple-icons": "^1.2.40",
+    "@nuxt/fonts": "0.11.4",
+    "@nuxt/icon": "1.15.0",
+    "@nuxt/image": "1.10.0",
+    "@nuxt/test-utils": "3.19.2",
+    "@nuxt/ui": "3.2.0",
+    "@nuxt/ui-pro": "^3.2.0",
+    "@nuxtjs/mdc": "^0.17.2",
+    "@prisma/client": "^6.11.1",
+    "@tanstack/query-devtools": "^5.84.0",
+    "@tanstack/vue-query": "^5.83.1",
+    "@tanstack/vue-query-devtools": "^5.85.3",
+    "@trpc/client": "^11.4.3",
+    "@trpc/server": "^11.4.3",
+    "@unovis/ts": "^1.5.2",
+    "@unovis/vue": "^1.5.2",
+    "@vueuse/nuxt": "^13.4.0",
+    "ai": "^5.0.14",
+    "appwrite": "^17.0.0",
+    "date-fns": "^4.1.0",
+    "effect": "^3.17.7",
+    "eslint-plugin-prettier": "^5.5.3",
+    "mysql2": "^3.14.1",
+    "nuxt": "^3.17.6",
+    "prisma": "^6.11.1",
+    "trpc-nuxt": "^1.2.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.4.1",
+    "eslint": "^9.30.0",
+    "tsx": "^4.20.4",
+    "typescript": "^5.8.3",
+    "vue-tsc": "^2.2.10"
+  },
+  "resolutions": {
+    "unimport": "4.1.1"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "maplibre-gl",
+      "vue-demi"
+    ]
+  },
+  "packageManager": "pnpm@10.12.4"
+}
