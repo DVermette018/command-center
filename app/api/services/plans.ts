@@ -6,17 +6,8 @@ import { type CreatePlanSchema, type PlanDTO } from '~~/dto/plan'
 const trpc = () => useNuxtApp().$trpc
 
 export interface PlanService {
-  // TanStack Query hooks for components
-  useGetAllQuery: (pagination: Pagination) => ReturnType<typeof planQueries.useGetAllQuery>
-  useCreateMutation: () => ReturnType<typeof planQueries.useCreateMutation>
-  // useUpdateMutation: () => ReturnType<typeof planQueries.useUpdateMutation>
-  // useDeleteMutation: () => ReturnType<typeof planQueries.useDeleteMutation>
-  
-  // Direct call methods for server-side or utility usage
-  getAll: (pagination: Pagination) => Promise<PaginatedResponse<PlanDTO>>
-  callCreate: () => (payload: CreatePlanSchema) => Promise<PlanDTO>
-  // callUpdate: () => (payload: WithId<Partial<Plan>>) => Promise<Plan>
-  // callDelete: () => (id: number) => Promise<void>
+  getAll: (pagination: Pagination) => ReturnType<typeof planQueries.useGetAllQuery>
+  create: () => ReturnType<typeof planQueries.useCreateMutation>
 }
 
 export const planQueries = defineService({
@@ -44,15 +35,6 @@ export const planQueries = defineService({
 })
 
 export const planService: PlanService = {
-  // TanStack Query hooks for components
-  useGetAllQuery: (p: Pagination) => planQueries.useGetAllQuery(p),
-  useCreateMutation: () => planQueries.useCreateMutation(),
-  // useUpdateMutation: () => planQueries.useUpdateMutation(),
-  // useDeleteMutation: () => planQueries.useDeleteMutation(),
-  
-  // Direct call methods for server-side or utility usage
-  getAll: (p: Pagination) => planQueries.getAll(p),
-  callCreate: () => planQueries.callCreate(),
-  // callUpdate: () => planQueries.callUpdate(),
-  // callDelete: () => planQueries.callDelete()
+  getAll: (p: Pagination) => planQueries.useGetAllQuery(p),
+  create: () => planQueries.useCreateMutation(),
 }

@@ -9,11 +9,7 @@ import type { CreateCustomerSchema } from '~~/dto/customer'
 const trpc = () => useNuxtApp().$trpc
 
 export interface BusinessService {
-  // TanStack Query hooks for components
-  useStoreMutation: () => ReturnType<typeof businessQueries.useStoreMutation>
-  
-  // Direct call methods for server-side or utility usage
-  callStore: () => (payload: CreateCustomerSchema) => Promise<any>
+  store: () => ReturnType<typeof businessQueries.useStoreMutation>
 }
 
 export const businessQueries = defineService({
@@ -29,9 +25,5 @@ export const businessQueries = defineService({
 })
 
 export const businessService: BusinessService = {
-  // TanStack Query hooks for components
-  useStoreMutation: () => businessQueries.useStoreMutation(),
-  
-  // Direct call methods for server-side or utility usage
-  callStore: () => businessQueries.callStore(),
+  store: () => businessQueries.useStoreMutation(),
 }

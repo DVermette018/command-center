@@ -5,42 +5,36 @@ import type { Customer } from '~~/types/customers'
 import type { TableColumn } from '@nuxt/ui'
 import { useApi } from '~/api'
 
-const api = useApi()
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UCheckbox = resolveComponent('UCheckbox')
 
+const api = useApi()
 const toast = useToast()
 const table = useTemplateRef('table')
 
-const columnFilters = ref([])
 const columnVisibility = ref()
 const rowSelection = ref({})
 
-// Use reactive pagination state
 const pagination = ref({
   pageIndex: 0,
   pageSize: 10
 })
 
-// Use the proper query hook for fetching customers
-const { data, isLoading, status, error } = api.customers.useGetAllQuery({
-  pageIndex: pagination.value.pageIndex + 1, // API expects 1-based pagination
-  pageSize: pagination.value.pageSize
+const paginationParams = reactive({
+  pageIndex: 1,
+  pageSize: 10
 })
 
-// Handle errors appropriately
-watchEffect(() => {
-  if (status.value === 'error') {
-    console.error('Failed to fetch customers:', error.value)
-    toast.add({
-      title: 'Error',
-      description: 'Failed to fetch customers',
-      color: 'error',
-      icon: 'i-lucide-x'
-    })
-  }
+const { data, isLoading, status, error, refetch } = api.customers.getAll(paginationParams)
+
+const selectedRowsCount = computed(() => {
+  return table.value?.tableApi?.getFilteredSelectedRowModel().rows.length || 0
+})
+
+const filteredRowsCount = computed(() => {
+  return table.value?.tableApi?.getFilteredRowModel().rows.length || 0
 })
 
 const getRowItems = (row: Row<Customer>) => {
@@ -193,9 +187,7 @@ const onRowClick = (row: Row<Customer>) => {
   navigateTo(`/customers/${row.original.id}`)
 }
 
-// Watch nameFilter instead of manipulating table API directly
 watch(nameFilter, (value) => {
-  // Use nextTick to avoid timing issues
   nextTick(() => {
     if (table?.value?.tableApi) {
       const nameColumn = table.value.tableApi.getColumn('name')
@@ -206,7 +198,6 @@ watch(nameFilter, (value) => {
   })
 })
 
-// Use nextTick to ensure table is initialized before applying filters
 watch(statusFilter, (newVal) => {
   nextTick(() => {
     if (!table?.value?.tableApi) return
@@ -221,11 +212,32 @@ watch(statusFilter, (newVal) => {
     }
   })
 })
+
+watch(pagination, (newPagination) => {
+  paginationParams.pageIndex = newPagination.pageIndex + 1
+  paginationParams.pageSize = newPagination.pageSize
+  refetch()
+}, { deep: true })
+
+watchEffect(() => {
+  if (status.value === 'error') {
+    console.error('Failed to fetch customers:', error.value)
+    toast.add({
+      title: 'Error',
+      description: 'Failed to fetch customers',
+      color: 'error',
+      icon: 'i-lucide-x'
+    })
+  }
+})
+
+const handlePageChange = (page: number) => {
+  pagination.value.pageIndex = page - 1
+}
 </script>
 
 <template>
   <div class="flex flex-wrap items-center justify-between gap-1.5">
-    <!-- Use v-model on nameFilter instead of direct table API manipulation -->
     <UInput
       v-model="nameFilter"
       class="max-w-sm"
@@ -234,9 +246,9 @@ watch(statusFilter, (newVal) => {
     />
 
     <div class="flex flex-wrap items-center gap-1.5">
-      <CustomersDeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
+      <CustomersDeleteModal :count="selectedRowsCount">
         <UButton
-          v-if="table?.tableApi?.getFilteredSelectedRowModel().rows.length"
+          v-if="selectedRowsCount > 0"
           color="error"
           icon="i-lucide-trash"
           label="Delete"
@@ -244,7 +256,7 @@ watch(statusFilter, (newVal) => {
         >
           <template #trailing>
             <UKbd>
-              {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length }}
+              {{ selectedRowsCount }}
             </UKbd>
           </template>
         </UButton>
@@ -297,8 +309,8 @@ watch(statusFilter, (newVal) => {
   <UTable
     ref="table"
     v-model:column-visibility="columnVisibility"
-    v-model:pagination="pagination"
     v-model:row-selection="rowSelection"
+    v-model:pagination="pagination"
     :columns="columns"
     :data="data?.data || []"
     :loading="isLoading"
@@ -318,16 +330,15 @@ watch(statusFilter, (newVal) => {
 
   <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
     <div class="text-sm text-muted">
-      {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
-      {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
+      {{ selectedRowsCount }} of
+      {{ filteredRowsCount }} row(s) selected.
     </div>
 
     <div class="flex items-center gap-1.5">
       <UPagination
-        :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-        :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-        :total="table?.tableApi?.getFilteredRowModel().rows.length"
-        @update:page="(p: number) => table?.tableApi?.setPageIndex(p - 1)"
+        :page="pagination.pageIndex + 1"
+        :page-count="Math.ceil((data?.pagination?.total || 0) / pagination.pageSize)"
+        @update:page="handlePageChange"
       />
     </div>
   </div>

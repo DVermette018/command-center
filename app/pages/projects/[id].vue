@@ -47,7 +47,7 @@ const links = [[{
 const api = useApi()
 
 // Use the proper query hook for fetching project by ID
-const { data: project, error, status } = await api.projects.useGetByIdQuery(projectId)
+const { data: project, error, status } = await api.projects.getById(projectId)
 
 // Handle errors appropriately
 if (status.value === 'error' || !project.value) {

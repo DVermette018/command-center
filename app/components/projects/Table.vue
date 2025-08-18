@@ -15,31 +15,40 @@ const UBadge = resolveComponent('UBadge')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UCheckbox = resolveComponent('UCheckbox')
 
+const api = useApi()
 const toast = useToast()
 const table = useTemplateRef('table')
 
-const columnFilters = ref([{
-  id: 'id',
-  value: ''
-}])
 const columnVisibility = ref()
-const rowSelection = ref({ 1: true })
+const rowSelection = ref({})
+const nameFilter = ref('')
 
-const api = useApi()
-
-// Use reactive pagination state
 const pagination = ref({
   pageIndex: 0,
   pageSize: 10
 })
 
-// Use the proper query hook for fetching projects
-const { data, isLoading, status, error } = api.projects.useGetAllQuery({
-  pageIndex: pagination.value.pageIndex + 1, // API expects 1-based pagination
-  pageSize: pagination.value.pageSize
+const paginationParams = reactive({
+  pageIndex: 1,
+  pageSize: 10
 })
 
-// Handle errors appropriately
+const { data, isLoading, status, error, refetch } = api.projects.getAll(paginationParams)
+
+const selectedRowsCount = computed(() => {
+  return table.value?.tableApi?.getFilteredSelectedRowModel().rows.length || 0
+})
+
+const filteredRowsCount = computed(() => {
+  return table.value?.tableApi?.getFilteredRowModel().rows.length || 0
+})
+
+watch(pagination, (newPagination) => {
+  paginationParams.pageIndex = newPagination.pageIndex + 1
+  paginationParams.pageSize = newPagination.pageSize
+  refetch()
+}, { deep: true })
+
 watchEffect(() => {
   if (status.value === 'error') {
     console.error('Failed to fetch projects:', error.value)
@@ -59,13 +68,13 @@ const getRowItems = (row: Row<Project>) => {
       label: 'Actions'
     },
     {
-      label: 'Copy customer ID',
+      label: 'Copy project ID',
       icon: 'i-lucide-copy',
       onSelect: () => {
         navigator.clipboard.writeText(row.original.id.toString())
         toast.add({
           title: 'Copied to clipboard',
-          description: `Customer ID ${row.original.id} copied to clipboard`
+          description: `Project ID ${row.original.id} copied to clipboard`
         })
       }
     },
@@ -73,27 +82,27 @@ const getRowItems = (row: Row<Project>) => {
       type: 'separator'
     },
     {
-      label: 'View customer details',
+      label: 'View project details',
       icon: 'i-lucide-list',
       onSelect: () => {
-        navigateTo(`/customers/${row.original.id}`)
+        navigateTo(`/projects/${row.original.id}`)
       }
     },
     {
-      label: 'View customer payments',
-      icon: 'i-lucide-wallet'
+      label: 'View project timeline',
+      icon: 'i-lucide-calendar'
     },
     {
       type: 'separator'
     },
     {
-      label: 'Delete customer',
+      label: 'Delete project',
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect: () => {
         toast.add({
-          title: 'Customer deleted',
-          description: 'The customer has been deleted.'
+          title: 'Project deleted',
+          description: 'The project has been deleted.'
         })
       }
     }
@@ -136,7 +145,7 @@ const columns: TableColumn<Project>[] = [
       return h('p', { class: 'font-medium text-highlighted' },
         (row.original.startDate ? format(row.original.startDate, 'd MMM') : 'Not Set') +
         ' - ' +
-        ((row.original.actualEndDate || row.original.actualEndDate) ?? 'Not set')
+        (row.original.actualEndDate ? format(row.original.actualEndDate, 'd MMM') : 'Not set')
       )
     }
   },
@@ -145,9 +154,13 @@ const columns: TableColumn<Project>[] = [
     header: 'Team',
     cell: ({ row }) => {
       return h('div', undefined, [
-        h('p', { class: 'font-medium text-highlighted' }, row.original.projectManager?.firstName + ' ' + row.original.projectManager?.lastName),
+        h('p', { class: 'font-medium text-highlighted' },
+          row.original.projectManager ?
+            `${row.original.projectManager.firstName} ${row.original.projectManager.lastName}` :
+            'No manager assigned'
+        ),
         h('p', { class: 'text-xs' }, (row.original.teamMembers?.length || '0') + ' members assigned')
-    ])
+      ])
     }
   },
   {
@@ -166,7 +179,7 @@ const columns: TableColumn<Project>[] = [
       }[row.original.status]
 
       return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-        row.original.status
+        row.original.status.toLowerCase().replace('_', ' ')
       )
     }
   },
@@ -203,34 +216,50 @@ const onRowClick = (row: Row<Project>) => {
   navigateTo(`/projects/${row.original.id}`)
 }
 
-watch(() => statusFilter.value, (newVal) => {
-  if (!table?.value?.tableApi) return
-
-  const statusColumn = table.value.tableApi.getColumn('status')
-  if (!statusColumn) return
-
-  if (newVal === 'all') {
-    statusColumn.setFilterValue(undefined)
-  } else {
-    statusColumn.setFilterValue(newVal)
-  }
+watch(nameFilter, (value) => {
+  nextTick(() => {
+    if (table?.value?.tableApi) {
+      const nameColumn = table.value.tableApi.getColumn('name')
+      if (nameColumn) {
+        nameColumn.setFilterValue(value || undefined)
+      }
+    }
+  })
 })
+
+watch(statusFilter, (newVal) => {
+  nextTick(() => {
+    if (!table?.value?.tableApi) return
+
+    const statusColumn = table.value.tableApi.getColumn('status')
+    if (!statusColumn) return
+
+    if (newVal === 'all') {
+      statusColumn.setFilterValue(undefined)
+    } else {
+      statusColumn.setFilterValue(newVal)
+    }
+  })
+})
+
+const handlePageChange = (page: number) => {
+  pagination.value.pageIndex = page - 1
+}
 </script>
 
 <template>
   <div class="flex flex-wrap items-center justify-between gap-1.5 w-full">
     <UInput
-      :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)"
+      v-model="nameFilter"
       class="max-w-sm"
       icon="i-lucide-search"
       placeholder="Filter name..."
-      @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)"
     />
 
     <div class="flex flex-wrap items-center gap-1.5">
-      <CustomersDeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
+      <CustomersDeleteModal :count="selectedRowsCount">
         <UButton
-          v-if="table?.tableApi?.getFilteredSelectedRowModel().rows.length"
+          v-if="selectedRowsCount > 0"
           color="error"
           icon="i-lucide-trash"
           label="Delete"
@@ -238,7 +267,7 @@ watch(() => statusFilter.value, (newVal) => {
         >
           <template #trailing>
             <UKbd>
-              {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length }}
+              {{ selectedRowsCount }}
             </UKbd>
           </template>
         </UButton>
@@ -247,11 +276,15 @@ watch(() => statusFilter.value, (newVal) => {
       <USelect
         v-model="statusFilter"
         :items="[
-              { label: 'All', value: 'all' },
-              { label: 'Subscribed', value: 'subscribed' },
-              { label: 'Unsubscribed', value: 'unsubscribed' },
-              { label: 'Bounced', value: 'bounced' }
-            ]"
+          { label: 'All', value: 'all' },
+          { label: 'Draft', value: 'DRAFT' },
+          { label: 'Pending Approval', value: 'PENDING_APPROVAL' },
+          { label: 'Active', value: 'ACTIVE' },
+          { label: 'On Hold', value: 'ON_HOLD' },
+          { label: 'Completed', value: 'COMPLETED' },
+          { label: 'Cancelled', value: 'CANCELLED' },
+          { label: 'Archived', value: 'ARCHIVED' }
+        ]"
         :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
         class="min-w-28"
         placeholder="Filter status"
@@ -262,44 +295,41 @@ watch(() => statusFilter.value, (newVal) => {
 
   <UTable
     ref="table"
-    v-model:column-filters="columnFilters"
     v-model:column-visibility="columnVisibility"
-    v-model:pagination="pagination"
     v-model:row-selection="rowSelection"
+    v-model:pagination="pagination"
     :columns="columns"
     :data="data?.data || []"
     :loading="isLoading"
     :pagination-options="{
-          getPaginationRowModel: getPaginationRowModel()
-        }"
+      getPaginationRowModel: getPaginationRowModel()
+    }"
     :ui="{
-          base: 'table-fixed border-separate border-spacing-0',
-          thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-          tbody: '[&>tr]:last:[&>td]:border-b-0',
-          th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-          td: 'border-b border-default cursor-pointer',
-        }"
+      base: 'table-fixed border-separate border-spacing-0',
+      thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+      tbody: '[&>tr]:last:[&>td]:border-b-0',
+      th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+      td: 'border-b border-default cursor-pointer',
+    }"
     class="shrink-0"
     @select="onRowClick"
   />
 
   <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
     <div class="text-sm text-muted">
-      {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
-      {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
+      {{ selectedRowsCount }} of
+      {{ filteredRowsCount }} row(s) selected.
     </div>
 
     <div class="flex items-center gap-1.5">
       <UPagination
-        :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-        :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-        :total="table?.tableApi?.getFilteredRowModel().rows.length"
-        @update:page="(p: number) => table?.tableApi?.setPageIndex(p - 1)"
+        :page="pagination.pageIndex + 1"
+        :page-count="Math.ceil((data?.pagination?.total || 0) / pagination.pageSize)"
+        @update:page="handlePageChange"
       />
     </div>
   </div>
 </template>
 
 <style scoped>
-
 </style>

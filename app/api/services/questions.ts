@@ -11,23 +11,13 @@ import type {
 const trpc = () => useNuxtApp().$trpc
 
 export interface QuestionService {
-  // TanStack Query hooks for components
-  useGetTemplatesForPlanQuery: (planType: PlanType) => ReturnType<typeof questionsQueries.useGetTemplatesForPlanQuery>
-  useGetProjectAnswersQuery: (projectId: string) => ReturnType<typeof questionsQueries.useGetProjectAnswersQuery>
-  useGetLastCompletedSectionQuery: (projectId: string) => ReturnType<typeof questionsQueries.useGetLastCompletedSectionQuery>
-  useGetProjectProgressQuery: (projectId: string) => ReturnType<typeof questionsQueries.useGetProjectProgressQuery>
-  useSaveDraftMutation: () => ReturnType<typeof questionsQueries.useSaveDraftMutation>
-  useSaveAnswersMutation: () => ReturnType<typeof questionsQueries.useSaveAnswersMutation>
-  useGenerateAIPromptMutation: () => ReturnType<typeof questionsQueries.useGenerateAIPromptMutation>
-  
-  // Direct call methods for server-side or utility usage
   getTemplatesForPlan: (planType: PlanType) => Promise<ListQuestionTemplateDTO[]>
   getProjectAnswers: (projectId: string) => Promise<ListAnswerDTO[]>
   getLastCompletedSection: (projectId: string) => Promise<number>
   getProjectProgress: (projectId: string) => Promise<ProjectSetupProgressDTO | null>
-  callSaveDraft: () => (data: SaveDraftDTO) => Promise<{ success: boolean; }>
-  callSaveAnswers: () => (data: SaveAnswersDTO) => Promise<{ success: boolean; }>
-  callGenerateAIPrompt: () => (projectId: string) => Promise<{ prompt: string; version: number }>
+  saveDraft: (data: SaveDraftDTO) => Promise<{ success: boolean; }>
+  saveAnswers: (data: SaveAnswersDTO) => Promise<{ success: boolean; }>
+  generateAIPrompt: (projectId: string) => Promise<{ prompt: string; version: number }>
 }
 
 export const questionsQueries = defineService({
@@ -66,21 +56,11 @@ export const questionsQueries = defineService({
 })
 
 export const questionService: QuestionService = {
-  // TanStack Query hooks for components
-  useGetTemplatesForPlanQuery: (planType: PlanType) => questionsQueries.useGetTemplatesForPlanQuery(planType),
-  useGetProjectAnswersQuery: (projectId: string) => questionsQueries.useGetProjectAnswersQuery(projectId),
-  useGetLastCompletedSectionQuery: (projectId: string) => questionsQueries.useGetLastCompletedSectionQuery(projectId),
-  useGetProjectProgressQuery: (projectId: string) => questionsQueries.useGetProjectProgressQuery(projectId),
-  useSaveDraftMutation: () => questionsQueries.useSaveDraftMutation(),
-  useSaveAnswersMutation: () => questionsQueries.useSaveAnswersMutation(),
-  useGenerateAIPromptMutation: () => questionsQueries.useGenerateAIPromptMutation(),
-  
-  // Direct call methods for server-side or utility usage
   getTemplatesForPlan: (planType: PlanType) => questionsQueries.getTemplatesForPlan(planType),
   getProjectAnswers: (projectId: string) => questionsQueries.getProjectAnswers(projectId),
   getLastCompletedSection: (projectId: string) => questionsQueries.getLastCompletedSection(projectId),
   getProjectProgress: (projectId: string) => questionsQueries.getProjectProgress(projectId),
-  callSaveDraft: () => questionsQueries.callSaveDraft(),
-  callSaveAnswers: () => questionsQueries.callSaveAnswers(),
-  callGenerateAIPrompt: () => questionsQueries.callGenerateAIPrompt()
+  saveDraft: (data: SaveDraftDTO) => questionsQueries.callSaveDraft()(data),
+  saveAnswers: (data: SaveAnswersDTO) => questionsQueries.callSaveAnswers()(data),
+  generateAIPrompt: (projectId: string) => questionsQueries.callGenerateAIPrompt()(projectId)
 }

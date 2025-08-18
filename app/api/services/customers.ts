@@ -13,20 +13,10 @@ export interface PeriodVariationByStatusParams {
 }
 
 export interface CustomerService {
-  useGetPeriodVariationByStatusQuery: (params: PeriodVariationByStatusParams) => ReturnType<typeof customerQueries.useGetPeriodVariationByStatusQuery>
-  useGetAllQuery: (pagination: Pagination) => ReturnType<typeof customerQueries.useGetAllQuery>
-  useGetByIdQuery: (id: string) => ReturnType<typeof customerQueries.useGetByIdQuery>
-  useCreateMutation: () => ReturnType<typeof customerQueries.useCreateMutation>
-  // useUpdateMutation: () => ReturnType<typeof customerQueries.useUpdateMutation>
-  // useDeleteMutation: () => ReturnType<typeof customerQueries.useDeleteMutation>
-  
-  // Direct call methods for server-side or utility usage
-  getPeriodVariationByStatus: (params: PeriodVariationByStatusParams) => Promise<any>
-  getAll: (pagination: Pagination) => Promise<any>
-  getById: (id: string) => Promise<any>
-  callCreate: () => (payload: CreateCustomerSchema) => Promise<any>
-  // callUpdate: () => (payload: UpdateCustomerSchema) => Promise<any>
-  // callDelete: () => (id: string) => Promise<any>
+  getPeriodVariationByStatus: (params: PeriodVariationByStatusParams) => ReturnType<typeof customerQueries.useGetPeriodVariationByStatusQuery>
+  getAll: (pagination: Pagination) => ReturnType<typeof customerQueries.useGetAllQuery>
+  getById: (id: string) => ReturnType<typeof customerQueries.useGetByIdQuery>
+  create: () => ReturnType<typeof customerQueries.useCreateMutation>
 }
 
 export const customerQueries = defineService({
@@ -70,19 +60,8 @@ export const customerQueries = defineService({
 })
 
 export const customerService: CustomerService = {
-  // TanStack Query hooks for components
-  useGetPeriodVariationByStatusQuery: (p: PeriodVariationByStatusParams) => customerQueries.useGetPeriodVariationByStatusQuery(p),
-  useGetAllQuery: (p: Pagination) => customerQueries.useGetAllQuery(p),
-  useGetByIdQuery: (id: string) => customerQueries.useGetByIdQuery(id),
-  useCreateMutation: () => customerQueries.useCreateMutation(),
-  // useUpdateMutation: () => customerQueries.useUpdateMutation(),
-  // useDeleteMutation: () => customerQueries.useDeleteMutation(),
-  
-  // Direct call methods for server-side or utility usage
-  getPeriodVariationByStatus: (p: PeriodVariationByStatusParams) => customerQueries.getPeriodVariationByStatus(p),
-  getAll: (p: Pagination) => customerQueries.getAll(p),
-  getById: (id: string) => customerQueries.getById(id),
-  callCreate: () => customerQueries.callCreate(),
-  // callUpdate: () => customerQueries.callUpdate(),
-  // callDelete: () => customerQueries.callDelete()
+  getPeriodVariationByStatus: (p: PeriodVariationByStatusParams) => customerQueries.useGetPeriodVariationByStatusQuery(p),
+  getAll: (p: Pagination) => customerQueries.useGetAllQuery(p),
+  getById: (id: string) => customerQueries.useGetByIdQuery(id),
+  create: () => customerQueries.useCreateMutation(),
 }

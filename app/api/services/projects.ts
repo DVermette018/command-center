@@ -6,15 +6,9 @@ import { type CreateProjectDTO, type ProjectDTO } from '~~/dto/project'
 const trpc = () => useNuxtApp().$trpc
 
 export interface ProjectService {
-  // TanStack Query hooks for components
-  useGetAllQuery: (pagination: Pagination) => ReturnType<typeof projectQueries.useGetAllQuery>
-  useGetByIdQuery: (id: string) => ReturnType<typeof projectQueries.useGetByIdQuery>
-  useStoreMutation: () => ReturnType<typeof projectQueries.useStoreMutation>
-  
-  // Direct call methods for server-side or utility usage
-  getAll: (pagination: Pagination) => Promise<PaginatedResponse<ProjectDTO>>
-  getById: (id: string) => Promise<ProjectDTO>
-  callStore: () => (payload: CreateProjectDTO) => Promise<ProjectDTO>
+  getAll: (pagination: Pagination) => ReturnType<typeof projectQueries.useGetAllQuery>
+  getById: (id: string) => ReturnType<typeof projectQueries.useGetByIdQuery>
+  create: () => ReturnType<typeof projectQueries.useStoreMutation>
 }
 
 export const projectQueries = defineService({
@@ -37,13 +31,7 @@ export const projectQueries = defineService({
 })
 
 export const projectService: ProjectService = {
-  // TanStack Query hooks for components
-  useGetAllQuery: (p: Pagination) => projectQueries.useGetAllQuery(p),
-  useGetByIdQuery: (id: string) => projectQueries.useGetByIdQuery(id),
-  useStoreMutation: () => projectQueries.useStoreMutation(),
-  
-  // Direct call methods for server-side or utility usage
-  getAll: (p: Pagination) => projectQueries.getAll(p),
-  getById: (id: string) => projectQueries.getById(id),
-  callStore: () => projectQueries.callStore(),
+  getAll: (p: Pagination) => projectQueries.useGetAllQuery(p),
+  getById: (id: string) => projectQueries.useGetByIdQuery(id),
+  create: () => projectQueries.useStoreMutation(),
 }

@@ -9,7 +9,7 @@ const toast = useToast()
 const open = ref(false)
 
 // Use the mutation hook for creating customers
-const createCustomerMutation = api.customers.useCreateMutation()
+const createCustomerMutation = api.customers.create()
 
 // Form state matching the Customer model
 const state = reactive<CreateCustomerSchema>({
