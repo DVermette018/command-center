@@ -175,7 +175,7 @@ const resetForm = (): void => {
     }
   }
 }
-console.log(createCustomerSchema.safeParse?.({}))
+// console.log(createCustomerSchema.safeParse?.({}))
 
 // Reset form when modal closes
 watch(open, (newValue) => {

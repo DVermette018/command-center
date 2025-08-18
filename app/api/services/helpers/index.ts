@@ -1,5 +1,6 @@
 // ~/api/services/helpers.ts
 import { useMutation, type UseMutationReturnType, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useApiConfig } from '~/composables/useApiConfig'
 
 interface QueryConfig<TArgs, TResponse> {
   queryFn: (args: TArgs) => Promise<TResponse>
@@ -92,11 +93,15 @@ export const defineService = <Q extends QueriesRecord, M extends MutationsRecord
   // Queries: build hook + plain callable
   Object.entries(config.queries).forEach(([name, { queryKey, queryFn }]) => {
     const hookName = `use${name.charAt(0).toUpperCase() + name.slice(1)}Query`
-    ;(service as any)[hookName] = (args?: any) =>
-      useQuery({
-        queryKey: queryKey(args),
-        queryFn: () => queryFn(args)
-      })
+    ;(service as any)[hookName] = (args?: any, apiConfig?: any) => {
+      const { getQueryOptions } = useApiConfig(apiConfig)
+      
+      // Use toValue for simple reactive unwrapping without circular deps
+      return useQuery(getQueryOptions({
+        queryKey: () => queryKey(toValue(args)),
+        queryFn: () => queryFn(toValue(args))
+      }))
+    }
 
     // plain callable (typed Promise<R>)
     ;(service as any)[name] = (args?: any) => queryFn(args)

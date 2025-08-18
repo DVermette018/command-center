@@ -32,8 +32,9 @@ useSeoMeta({
   twitterImage: 'https://assets.hub.nuxt.com/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJodHRwczovL2Rhc2hib2FyZC10ZW1wbGF0ZS5udXh0LmRldiIsImlhdCI6MTczOTQ2MzU2N30._VElt4uvLjvAMdnTLytCInOajMElzWDKbmvOaMZhZUI.jpg?theme=light',
   twitterCard: 'summary_large_image'
 })
-const queryClient = useQueryClient()
-// window.__TANSTACK_QUERY_CLIENT__ = useQueryClient()
+onMounted(() => {
+  window.__TANSTACK_QUERY_CLIENT__ = useQueryClient()
+})
 </script>
 
 <template>

@@ -13,15 +13,12 @@ export interface PeriodVariationByStatusParams {
 }
 
 export interface CustomerService {
-  getPeriodVariationByStatus: (params: PeriodVariationByStatusParams) => Promise<{
-    currentPeriod: number
-    percentageChange: number
-  }>
-  getAll (pagination: Pagination): Promise<PaginatedResponse<CustomerDTO>>
-  getById (id: string): Promise<CustomerDTO>
-  create (payload: CreateCustomerSchema): Promise<CustomerDTO>
-  // update (payload: UpdateCustomerSchema): Promise<Customer>
-  // delete (id: string): Promise<void>
+  getPeriodVariationByStatus: (params: PeriodVariationByStatusParams) => ReturnType<typeof customerQueries.useGetPeriodVariationByStatusQuery>
+  getAll: (pagination: Pagination) => ReturnType<typeof customerQueries.useGetAllQuery>
+  getById: (id: string) => ReturnType<typeof customerQueries.useGetByIdQuery>
+  create: () => ReturnType<typeof customerQueries.useCreateMutation>
+  // update: () => ReturnType<typeof customerQueries.useUpdateMutation>
+  // delete: () => ReturnType<typeof customerQueries.useDeleteMutation>
 }
 
 export const customerQueries = defineService({
@@ -65,10 +62,10 @@ export const customerQueries = defineService({
 })
 
 export const customerService: CustomerService = {
-  getPeriodVariationByStatus: (p: PeriodVariationByStatusParams) => customerQueries.getPeriodVariationByStatus(p),
-  getAll: (p: Pagination) => customerQueries.getAll(p),
-  getById: (id: string) => customerQueries.getById(id),
-  create: (payload: CreateCustomerSchema) => customerQueries.callCreate()(payload),
-  // update: (payload: UpdateCustomerSchema) => customerQueries.callUpdate()(payload),
-  // delete: (id) => customerQueries.callDelete()(id)
+  getPeriodVariationByStatus: (p: PeriodVariationByStatusParams) => customerQueries.useGetPeriodVariationByStatusQuery(p),
+  getAll: (p: Pagination) => customerQueries.useGetAllQuery(p),
+  getById: (id: string) => customerQueries.useGetByIdQuery(id),
+  create: () => customerQueries.useCreateMutation(),
+  // update: () => customerQueries.useUpdateMutation(),
+  // delete: () => customerQueries.useDeleteMutation()
 }

@@ -14,18 +14,21 @@ const UCheckbox = resolveComponent('UCheckbox')
 const toast = useToast()
 const table = useTemplateRef('table')
 
-const columnFilters = ref([{
-  id: 'id',
-  value: ''
-}])
+const columnFilters = ref([])
 const columnVisibility = ref()
-const rowSelection = ref({ 1: true })
+const rowSelection = ref({})
 
-const status = ref<'pending' | 'success' | 'error'>('success')
-const { data } = await api.customers.getAll({
+const { data, isLoading, status } = api.customers.getAll({
   pageIndex: 1,
   pageSize: 10
 })
+
+if (status.value === 'error') {
+  throw createError({
+    statusCode: 500,
+    statusMessage: 'Failed to fetch customers'
+  })
+}
 
 const getRowItems = (row: Row<Customer>) => {
   return [
@@ -171,22 +174,39 @@ const columns: TableColumn<Customer>[] = [
 ]
 
 const statusFilter = ref('all')
+const nameFilter = ref('')
 
 const onRowClick = (row: Row<Customer>) => {
   navigateTo(`/customers/${row.original.id}`)
 }
 
-watch(() => statusFilter.value, (newVal) => {
-  if (!table?.value?.tableApi) return
+// Watch nameFilter instead of manipulating table API directly
+watch(nameFilter, (value) => {
+  // Use nextTick to avoid timing issues
+  nextTick(() => {
+    if (table?.value?.tableApi) {
+      const nameColumn = table.value.tableApi.getColumn('name')
+      if (nameColumn) {
+        nameColumn.setFilterValue(value || undefined)
+      }
+    }
+  })
+})
 
-  const statusColumn = table.value.tableApi.getColumn('status')
-  if (!statusColumn) return
+// Use nextTick to ensure table is initialized before applying filters
+watch(statusFilter, (newVal) => {
+  nextTick(() => {
+    if (!table?.value?.tableApi) return
 
-  if (newVal === 'all') {
-    statusColumn.setFilterValue(undefined)
-  } else {
-    statusColumn.setFilterValue(newVal)
-  }
+    const statusColumn = table.value.tableApi.getColumn('status')
+    if (!statusColumn) return
+
+    if (newVal === 'all') {
+      statusColumn.setFilterValue(undefined)
+    } else {
+      statusColumn.setFilterValue(newVal)
+    }
+  })
 })
 
 const pagination = ref({
@@ -196,14 +216,13 @@ const pagination = ref({
 </script>
 
 <template>
-
   <div class="flex flex-wrap items-center justify-between gap-1.5">
+    <!-- Use v-model on nameFilter instead of direct table API manipulation -->
     <UInput
-      :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)"
+      v-model="nameFilter"
       class="max-w-sm"
       icon="i-lucide-search"
       placeholder="Filter name..."
-      @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)"
     />
 
     <div class="flex flex-wrap items-center gap-1.5">
@@ -226,33 +245,36 @@ const pagination = ref({
       <USelect
         v-model="statusFilter"
         :items="[
-              { label: 'All', value: 'all' },
-              { label: 'Subscribed', value: 'subscribed' },
-              { label: 'Unsubscribed', value: 'unsubscribed' },
-              { label: 'Bounced', value: 'bounced' }
-            ]"
+          { label: 'All', value: 'all' },
+          { label: 'Lead', value: 'LEAD' },
+          { label: 'Prospect', value: 'PROSPECT' },
+          { label: 'Active', value: 'ACTIVE' },
+          { label: 'Inactive', value: 'INACTIVE' },
+          { label: 'Churned', value: 'CHURNED' }
+        ]"
         :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
         class="min-w-28"
         placeholder="Filter status"
       />
+
       <UDropdownMenu
         :content="{ align: 'end' }"
         :items="
-              table?.tableApi
-                ?.getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => ({
-                  label: upperFirst(column.id),
-                  type: 'checkbox' as const,
-                  checked: column.getIsVisible(),
-                  onUpdateChecked(checked: boolean) {
-                    table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-                  },
-                  onSelect(e?: Event) {
-                    e?.preventDefault()
-                  }
-                }))
-            "
+          table?.tableApi
+            ?.getAllColumns()
+            .filter((column) => column.getCanHide())
+            .map((column) => ({
+              label: upperFirst(column.id),
+              type: 'checkbox' as const,
+              checked: column.getIsVisible(),
+              onUpdateChecked(checked: boolean) {
+                table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+              },
+              onSelect(e?: Event) {
+                e?.preventDefault()
+              }
+            }))
+        "
       >
         <UButton
           color="neutral"
@@ -266,23 +288,22 @@ const pagination = ref({
 
   <UTable
     ref="table"
-    v-model:column-filters="columnFilters"
     v-model:column-visibility="columnVisibility"
     v-model:pagination="pagination"
     v-model:row-selection="rowSelection"
     :columns="columns"
-    :data="data"
-    :loading="status === 'pending'"
+    :data="data?.data || []"
+    :loading="isLoading"
     :pagination-options="{
-          getPaginationRowModel: getPaginationRowModel()
-        }"
+      getPaginationRowModel: getPaginationRowModel()
+    }"
     :ui="{
-          base: 'table-fixed border-separate border-spacing-0',
-          thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-          tbody: '[&>tr]:last:[&>td]:border-b-0',
-          th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-          td: 'border-b border-default cursor-pointer',
-        }"
+      base: 'table-fixed border-separate border-spacing-0',
+      thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+      tbody: '[&>tr]:last:[&>td]:border-b-0',
+      th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+      td: 'border-b border-default cursor-pointer',
+    }"
     class="shrink-0"
     @select="onRowClick"
   />
@@ -305,5 +326,4 @@ const pagination = ref({
 </template>
 
 <style scoped>
-
 </style>
