@@ -8,6 +8,9 @@ const toast = useToast()
 
 const open = ref(false)
 
+// Use the mutation hook for creating customers
+const createCustomerMutation = api.customers.useCreateMutation()
+
 // Form state matching the Customer model
 const state = reactive<CreateCustomerSchema>({
   business: {
@@ -121,34 +124,35 @@ const onError = (error: any): void => {
 // Submit handler
 const onSubmit = async (event: FormSubmitEvent<CreateCustomerSchema>): Promise<void> => {
   console.log('Form submitted with data:', event.data)
-  try {
-    // Prepare the payload
-    await api.customers.create({
-      business: event.data.business,
-      status: event.data.status,
-      source: event.data.source,
-      contact: event.data.contact
-    })
+  
+  createCustomerMutation.mutate({
+    business: event.data.business,
+    status: event.data.status,
+    source: event.data.source,
+    contact: event.data.contact
+  }, {
+    onSuccess: (data) => {
+      toast.add({
+        title: 'Cliente creado',
+        description: `${event.data.business.businessName} ha sido agregado exitosamente`,
+        color: 'success',
+        icon: 'i-lucide-check'
+      })
 
-    toast.add({
-      title: 'Cliente creado',
-      description: `${event.data.name} ha sido agregado exitosamente`,
-      color: 'success',
-      icon: 'i-lucide-check'
-    })
-
-    // Reset form and close modal
-    resetForm()
-    open.value = false
-  } catch (error) {
-    console.error('Error creating customer:', error)
-    toast.add({
-      title: 'Error',
-      description: 'No se pudo crear el cliente',
-      color: 'error',
-      icon: 'i-lucide-x'
-    })
-  }
+      // Reset form and close modal
+      resetForm()
+      open.value = false
+    },
+    onError: (error) => {
+      console.error('Error creating customer:', error)
+      toast.add({
+        title: 'Error',
+        description: 'No se pudo crear el cliente',
+        color: 'error',
+        icon: 'i-lucide-x'
+      })
+    }
+  })
 }
 
 // Reset form helper

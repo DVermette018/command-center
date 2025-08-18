@@ -7,7 +7,11 @@ import type { ListUserDTO } from '~~/dto/user'
 const trpc = () => useNuxtApp().$trpc
 
 export interface UserService {
-  getAllByRoles (pagination: Pagination): Promise<PaginatedResponse<ListUserDTO>>
+  // TanStack Query hooks for components
+  useGetAllByRolesQuery: (pagination: Pagination & { roles: UserRole[]}) => ReturnType<typeof userQueries.useGetAllByRolesQuery>
+  
+  // Direct call methods for server-side or utility usage
+  getAllByRoles: (pagination: Pagination & { roles: UserRole[]}) => Promise<PaginatedResponse<ListUserDTO>>
 }
 
 export const userQueries = defineService({
@@ -23,5 +27,9 @@ export const userQueries = defineService({
 })
 
 export const userService: UserService = {
+  // TanStack Query hooks for components
+  useGetAllByRolesQuery: (p: Pagination & { roles: UserRole[]}) => userQueries.useGetAllByRolesQuery(p),
+  
+  // Direct call methods for server-side or utility usage
   getAllByRoles: (p: Pagination & { roles: UserRole[]}) => userQueries.getAllByRoles(p),
 }

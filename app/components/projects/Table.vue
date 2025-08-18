@@ -26,10 +26,30 @@ const columnVisibility = ref()
 const rowSelection = ref({ 1: true })
 
 const api = useApi()
-const status = ref<'pending' | 'success' | 'error'>('success')
-const { data } = await api.projects.getAll({
-  pageIndex: 1,
+
+// Use reactive pagination state
+const pagination = ref({
+  pageIndex: 0,
   pageSize: 10
+})
+
+// Use the proper query hook for fetching projects
+const { data, isLoading, status, error } = api.projects.useGetAllQuery({
+  pageIndex: pagination.value.pageIndex + 1, // API expects 1-based pagination
+  pageSize: pagination.value.pageSize
+})
+
+// Handle errors appropriately
+watchEffect(() => {
+  if (status.value === 'error') {
+    console.error('Failed to fetch projects:', error.value)
+    toast.add({
+      title: 'Error',
+      description: 'Failed to fetch projects',
+      color: 'error',
+      icon: 'i-lucide-x'
+    })
+  }
 })
 
 const getRowItems = (row: Row<Project>) => {
@@ -195,11 +215,6 @@ watch(() => statusFilter.value, (newVal) => {
     statusColumn.setFilterValue(newVal)
   }
 })
-
-const pagination = ref({
-  pageIndex: 0,
-  pageSize: 10
-})
 </script>
 
 <template>
@@ -252,8 +267,8 @@ const pagination = ref({
     v-model:pagination="pagination"
     v-model:row-selection="rowSelection"
     :columns="columns"
-    :data="data"
-    :loading="status === 'pending'"
+    :data="data?.data || []"
+    :loading="isLoading"
     :pagination-options="{
           getPaginationRowModel: getPaginationRowModel()
         }"

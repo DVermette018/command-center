@@ -45,9 +45,12 @@ const links = [[{
 ]] satisfies NavigationMenuItem[][]
 
 const api = useApi()
-const project = await api.projects.getById(projectId)
 
-if (!project) {
+// Use the proper query hook for fetching project by ID
+const { data: project, error, status } = await api.projects.useGetByIdQuery(projectId)
+
+// Handle errors appropriately
+if (status.value === 'error' || !project.value) {
   throw createError({
     statusCode: 404,
     statusMessage: 'Project not found'
@@ -59,7 +62,7 @@ if (!project) {
 <template>
   <UDashboardPanel id="customer">
     <template #header>
-      <UDashboardNavbar :title="project.name" >
+      <UDashboardNavbar :title="project?.name || 'Loading...'" >
         <template #leading>
           <UDashboardSidebarCollapse/>
         </template>

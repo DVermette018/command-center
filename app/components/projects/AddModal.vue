@@ -16,6 +16,9 @@ const toast = useToast()
 
 const open = ref(false)
 
+// Use the mutation hook for creating projects
+const createProjectMutation = api.projects.useStoreMutation()
+
 // Form state matching the Project model
 const state = reactive<CreateProjectDTO>({
   customerId: props.customerId,
@@ -32,11 +35,26 @@ const state = reactive<CreateProjectDTO>({
 
 const projectManagers = ref<SelectOption[]>([])
 
-const loadData = async () => {
-  try {
-    const { data } = await api.users.getAllByRoles({ roles: ['PROJECT_MANAGER', 'DEVELOPER', 'DESIGNER'] })
-    projectManagers.value = data.map((u: ListUserDTO) => ({ label: `${u.firstName} ${u.lastName}`, value: u.id }))
-  } catch (error) {
+// Use query hook for loading users
+const { data: usersData, error: usersError } = api.users.useGetAllByRolesQuery({ 
+  pageIndex: 1, 
+  pageSize: 100, 
+  roles: ['PROJECT_MANAGER', 'DEVELOPER', 'DESIGNER'] 
+})
+
+// Watch for data changes and update projectManagers
+watch(usersData, (data) => {
+  if (data?.data) {
+    projectManagers.value = data.data.map((u: ListUserDTO) => ({ 
+      label: `${u.firstName} ${u.lastName}`, 
+      value: u.id 
+    }))
+  }
+}, { immediate: true })
+
+// Watch for errors
+watch(usersError, (error) => {
+  if (error) {
     toast.add({
       title: 'Error',
       description: 'No se pudieron cargar los usuarios',
@@ -44,7 +62,7 @@ const loadData = async () => {
       icon: 'i-lucide-x'
     })
   }
-}
+})
 
 // Options
 const projectTypeOptions = [
@@ -114,36 +132,37 @@ const onError = (error: any): void => {
 // Submit handler
 const onSubmit = async (event: FormSubmitEvent<CreateProjectDTO>): Promise<void> => {
   console.log('Form submitted with data:', event.data)
-  try {
-    await api.projects.store({
-      customerId: event.data.customerId,
-      name: event.data.name,
-      type: event.data.type,
+  
+  createProjectMutation.mutate({
+    customerId: event.data.customerId,
+    name: event.data.name,
+    type: event.data.type,
+    startDate: event.data.startDate,
+    targetEndDate: event.data.targetEndDate,
+    projectManagerId: event.data.projectManagerId,
+  }, {
+    onSuccess: (data) => {
+      toast.add({
+        title: 'Proyecto creado',
+        description: `${event.data.name} ha sido creado exitosamente`,
+        color: 'success',
+        icon: 'i-lucide-check'
+      })
 
-      startDate: event.data.startDate,
-      targetEndDate: event.data.targetEndDate,
-      projectManagerId: event.data.projectManagerId,
-    })
-
-    toast.add({
-      title: 'Proyecto creado',
-      description: `${event.data.name} ha sido creado exitosamente`,
-      color: 'success',
-      icon: 'i-lucide-check'
-    })
-
-    // Reset form and close modal
-    resetForm()
-    open.value = false
-  } catch (error) {
-    console.error('Error creating project:', error)
-    toast.add({
-      title: 'Error',
-      description: 'No se pudo crear el proyecto',
-      color: 'error',
-      icon: 'i-lucide-x'
-    })
-  }
+      // Reset form and close modal
+      resetForm()
+      open.value = false
+    },
+    onError: (error) => {
+      console.error('Error creating project:', error)
+      toast.add({
+        title: 'Error',
+        description: 'No se pudo crear el proyecto',
+        color: 'error',
+        icon: 'i-lucide-x'
+      })
+    }
+  })
 }
 
 // Reset form helper
@@ -164,10 +183,6 @@ watch(open, (newValue) => {
   }
 })
 
-// Load customers and users on mount
-onMounted(async () => {
-  loadData()
-})
 </script>
 
 <template>

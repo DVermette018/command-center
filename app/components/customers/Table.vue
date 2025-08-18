@@ -18,17 +18,30 @@ const columnFilters = ref([])
 const columnVisibility = ref()
 const rowSelection = ref({})
 
-const { data, isLoading, status } = api.customers.getAll({
-  pageIndex: 1,
+// Use reactive pagination state
+const pagination = ref({
+  pageIndex: 0,
   pageSize: 10
 })
 
-if (status.value === 'error') {
-  throw createError({
-    statusCode: 500,
-    statusMessage: 'Failed to fetch customers'
-  })
-}
+// Use the proper query hook for fetching customers
+const { data, isLoading, status, error } = api.customers.useGetAllQuery({
+  pageIndex: pagination.value.pageIndex + 1, // API expects 1-based pagination
+  pageSize: pagination.value.pageSize
+})
+
+// Handle errors appropriately
+watchEffect(() => {
+  if (status.value === 'error') {
+    console.error('Failed to fetch customers:', error.value)
+    toast.add({
+      title: 'Error',
+      description: 'Failed to fetch customers',
+      color: 'error',
+      icon: 'i-lucide-x'
+    })
+  }
+})
 
 const getRowItems = (row: Row<Customer>) => {
   return [
@@ -207,11 +220,6 @@ watch(statusFilter, (newVal) => {
       statusColumn.setFilterValue(newVal)
     }
   })
-})
-
-const pagination = ref({
-  pageIndex: 0,
-  pageSize: 10
 })
 </script>
 
