@@ -26,15 +26,6 @@ const links = [[{
   to: `/customers/${userId}/billing`
 }]] satisfies NavigationMenuItem[][]
 
-const customer = await api.customers.getById(userId)
-
-if (!customer) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Customer not found'
-  })
-}
-
 </script>
 
 <template>
