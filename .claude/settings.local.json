@@ -21,7 +21,8 @@
       "Bash(grep:*)",
       "Bash(npm run lint)",
       "Bash(git commit:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
