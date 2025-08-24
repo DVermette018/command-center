@@ -25,6 +25,7 @@
       "Bash(git push:*)",
       "Bash(gh pr create:*)",
       "Bash(npx tsc:*)"
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
