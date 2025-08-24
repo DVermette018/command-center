@@ -1,8 +1,9 @@
 import type { PrismaClient } from '@prisma/client'
 import type { Pagination } from '~~/types/common'
 import type { PaginatedResponse } from '~~/types/api'
-import type { CreateProjectDTO, ProjectDTO, ProjectListDTO } from '~~/dto/project'
+import type { CreateProjectDTO, ProjectDTO, ProjectListDTO, UpdateProjectDTO, CreateProjectTeamMemberDTO, ProjectTeamMemberDTO } from '~~/dto/project'
 import type { Project } from '~~/types/project'
+import { prismaToDTO } from '~~/utils/prisma-mappers'
 
 // projects
 export const register = (db: PrismaClient) => ({
@@ -247,6 +248,423 @@ export const register = (db: PrismaClient) => ({
       }
     } catch (error) {
       console.error('Error creating project:', error)
+      throw error
+    }
+  },
+
+  update: async (updateData: UpdateProjectDTO): Promise<ProjectDTO> => {
+    try {
+      const { id, ...data } = updateData
+      
+      const p = await db.project.update({
+        where: { id },
+        data: {
+          ...data,
+          updatedAt: new Date()
+        },
+        include: {
+          projectManager: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+              isActive: true
+            }
+          },
+          teamMembers: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  firstName: true,
+                  lastName: true,
+                  role: true,
+                  isActive: true
+                }
+              }
+            }
+          }
+        }
+      })
+
+      return prismaToDTO({
+        id: p.id,
+        customerId: p.customerId,
+        name: p.name,
+        description: p.description,
+        type: p.type,
+        status: p.status,
+        phase: p.phase,
+        priority: p.priority,
+        startDate: p.startDate,
+        targetEndDate: p.targetEndDate,
+        actualEndDate: p.actualEndDate,
+        projectManager: p.projectManager ? {
+          id: p.projectManager.id,
+          email: p.projectManager.email,
+          firstName: p.projectManager.firstName,
+          lastName: p.projectManager.lastName,
+          role: p.projectManager.role,
+          isActive: p.projectManager.isActive
+        } : null,
+        teamMembers: p.teamMembers?.map(tm => ({
+          id: tm.user.id,
+          email: tm.user.email,
+          firstName: tm.user.firstName,
+          lastName: tm.user.lastName,
+          role: tm.user.role,
+          isActive: tm.user.isActive,
+          leftAt: tm.leftAt
+        })),
+        budget: p.budget ? Number(p.budget) : null,
+        currency: p.currency,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt
+      })
+    } catch (error) {
+      console.error('Error updating project:', error)
+      throw error
+    }
+  },
+
+  updateStatus: async (statusData: { id: string; status: string; reason?: string }): Promise<ProjectDTO> => {
+    try {
+      const p = await db.project.update({
+        where: { id: statusData.id },
+        data: {
+          status: statusData.status as any,
+          updatedAt: new Date()
+        },
+        include: {
+          projectManager: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+              isActive: true
+            }
+          },
+          teamMembers: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  firstName: true,
+                  lastName: true,
+                  role: true,
+                  isActive: true
+                }
+              }
+            }
+          }
+        }
+      })
+
+      return prismaToDTO({
+        id: p.id,
+        customerId: p.customerId,
+        name: p.name,
+        description: p.description,
+        type: p.type,
+        status: p.status,
+        phase: p.phase,
+        priority: p.priority,
+        startDate: p.startDate,
+        targetEndDate: p.targetEndDate,
+        actualEndDate: p.actualEndDate,
+        projectManager: p.projectManager ? {
+          id: p.projectManager.id,
+          email: p.projectManager.email,
+          firstName: p.projectManager.firstName,
+          lastName: p.projectManager.lastName,
+          role: p.projectManager.role,
+          isActive: p.projectManager.isActive
+        } : null,
+        teamMembers: p.teamMembers?.map(tm => ({
+          id: tm.user.id,
+          email: tm.user.email,
+          firstName: tm.user.firstName,
+          lastName: tm.user.lastName,
+          role: tm.user.role,
+          isActive: tm.user.isActive,
+          leftAt: tm.leftAt
+        })),
+        budget: p.budget ? Number(p.budget) : null,
+        currency: p.currency,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt
+      })
+    } catch (error) {
+      console.error('Error updating project status:', error)
+      throw error
+    }
+  },
+
+  updatePhase: async (phaseData: { id: string; phase: string; notes?: string }): Promise<ProjectDTO> => {
+    try {
+      const [p, _] = await db.$transaction([
+        db.project.update({
+          where: { id: phaseData.id },
+          data: {
+            phase: phaseData.phase as any,
+            updatedAt: new Date()
+          },
+          include: {
+            projectManager: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+                isActive: true
+              }
+            },
+            teamMembers: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    role: true,
+                    isActive: true
+                  }
+                }
+              }
+            }
+          }
+        }),
+        db.projectPhaseHistory.create({
+          data: {
+            projectId: phaseData.id,
+            phase: phaseData.phase as any,
+            status: 'IN_PROGRESS',
+            startedAt: new Date(),
+            notes: phaseData.notes
+          }
+        })
+      ])
+
+      return prismaToDTO({
+        id: p.id,
+        customerId: p.customerId,
+        name: p.name,
+        description: p.description,
+        type: p.type,
+        status: p.status,
+        phase: p.phase,
+        priority: p.priority,
+        startDate: p.startDate,
+        targetEndDate: p.targetEndDate,
+        actualEndDate: p.actualEndDate,
+        projectManager: p.projectManager ? {
+          id: p.projectManager.id,
+          email: p.projectManager.email,
+          firstName: p.projectManager.firstName,
+          lastName: p.projectManager.lastName,
+          role: p.projectManager.role,
+          isActive: p.projectManager.isActive
+        } : null,
+        teamMembers: p.teamMembers?.map(tm => ({
+          id: tm.user.id,
+          email: tm.user.email,
+          firstName: tm.user.firstName,
+          lastName: tm.user.lastName,
+          role: tm.user.role,
+          isActive: tm.user.isActive,
+          leftAt: tm.leftAt
+        })),
+        budget: p.budget ? Number(p.budget) : null,
+        currency: p.currency,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt
+      })
+    } catch (error) {
+      console.error('Error updating project phase:', error)
+      throw error
+    }
+  },
+
+  addTeamMember: async (memberData: CreateProjectTeamMemberDTO): Promise<ProjectTeamMemberDTO> => {
+    try {
+      const teamMember = await db.projectTeamMember.create({
+        data: {
+          projectId: memberData.projectId,
+          userId: memberData.userId,
+          role: memberData.role,
+          joinedAt: new Date()
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+              isActive: true
+            }
+          }
+        }
+      })
+
+      return prismaToDTO({
+        id: teamMember.id,
+        projectId: teamMember.projectId,
+        userId: teamMember.userId,
+        role: teamMember.role,
+        user: {
+          id: teamMember.user.id,
+          email: teamMember.user.email,
+          firstName: teamMember.user.firstName,
+          lastName: teamMember.user.lastName,
+          role: teamMember.user.role,
+          isActive: teamMember.user.isActive
+        },
+        joinedAt: teamMember.joinedAt,
+        leftAt: teamMember.leftAt
+      })
+    } catch (error) {
+      console.error('Error adding team member:', error)
+      throw error
+    }
+  },
+
+  removeTeamMember: async (removeData: { projectId: string; userId: string }): Promise<void> => {
+    try {
+      const result = await db.projectTeamMember.updateMany({
+        where: {
+          projectId: removeData.projectId,
+          userId: removeData.userId,
+          leftAt: null
+        },
+        data: {
+          leftAt: new Date()
+        }
+      })
+
+      if (result.count === 0) {
+        throw new Error('Team member not found or already removed')
+      }
+    } catch (error) {
+      console.error('Error removing team member:', error)
+      throw error
+    }
+  },
+
+  getTeamMembers: async (projectId: string): Promise<ProjectTeamMemberDTO[]> => {
+    try {
+      const teamMembers = await db.projectTeamMember.findMany({
+        where: {
+          projectId,
+          leftAt: null // Only active team members
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+              isActive: true
+            }
+          }
+        },
+        orderBy: { joinedAt: 'asc' }
+      })
+
+      return teamMembers.map(tm => prismaToDTO({
+        id: tm.id,
+        projectId: tm.projectId,
+        userId: tm.userId,
+        role: tm.role,
+        user: {
+          id: tm.user.id,
+          email: tm.user.email,
+          firstName: tm.user.firstName,
+          lastName: tm.user.lastName,
+          role: tm.user.role,
+          isActive: tm.user.isActive
+        },
+        joinedAt: tm.joinedAt,
+        leftAt: tm.leftAt
+      }))
+    } catch (error) {
+      console.error('Error fetching team members:', error)
+      throw error
+    }
+  },
+
+  createPhaseHistory: async (historyData: { projectId: string; phase: string; status: string; notes?: string }) => {
+    try {
+      const history = await db.projectPhaseHistory.create({
+        data: {
+          projectId: historyData.projectId,
+          phase: historyData.phase as any,
+          status: historyData.status as any,
+          startedAt: new Date(),
+          notes: historyData.notes
+        }
+      })
+
+      return prismaToDTO({
+        id: history.id,
+        projectId: history.projectId,
+        phase: history.phase,
+        status: history.status,
+        startedAt: history.startedAt,
+        completedAt: history.completedAt,
+        notes: history.notes
+      })
+    } catch (error) {
+      console.error('Error creating phase history:', error)
+      throw error
+    }
+  },
+
+  getPhaseHistory: async (projectId: string) => {
+    try {
+      const history = await db.projectPhaseHistory.findMany({
+        where: { projectId },
+        orderBy: { startedAt: 'asc' }
+      })
+
+      return history.map(h => prismaToDTO({
+        id: h.id,
+        projectId: h.projectId,
+        phase: h.phase,
+        status: h.status,
+        startedAt: h.startedAt,
+        completedAt: h.completedAt,
+        notes: h.notes
+      }))
+    } catch (error) {
+      console.error('Error fetching phase history:', error)
+      throw error
+    }
+  },
+
+  delete: async (id: string): Promise<void> => {
+    try {
+      // Soft delete by updating status to ARCHIVED
+      await db.project.update({
+        where: { id },
+        data: {
+          status: 'ARCHIVED',
+          updatedAt: new Date()
+        }
+      })
+    } catch (error) {
+      console.error('Error deleting project:', error)
       throw error
     }
   }
