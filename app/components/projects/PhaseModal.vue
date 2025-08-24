@@ -1,19 +1,31 @@
 <template>
+  <!-- Trigger Button -->
+  <UButton
+    :icon="triggerIcon"
+    :color="triggerColor"
+    :variant="triggerVariant"
+    @click="open"
+  >
+    {{ triggerText }}
+  </UButton>
+
+  <!-- Modal -->
   <UModal
     v-model:open="isOpen"
-    :description="`Change project phase from ${currentPhase} to ${selectedPhase}`"
     :title="`Update Project Phase`"
+    :description="`Change project phase from ${currentPhase} to ${selectedPhase}`"
   >
+    <template #body>
     <div class="flex flex-col space-y-4">
       <!-- Phase Selection -->
       <UFormField
         label="New Phase"
-        name="phase" 
+        name="phase"
         required
       >
         <USelect
           v-model="selectedPhase"
-          :options="phaseOptions"
+          :items="phaseOptions"
           placeholder="Select new phase"
           class="w-full"
         />
@@ -35,22 +47,22 @@
       <div class="p-4 bg-gray-50 rounded-lg">
         <h4 class="text-sm font-medium mb-3">Project Phase Flow:</h4>
         <div class="flex flex-wrap gap-2">
-          <div 
-            v-for="(phase, index) in allPhases" 
+          <div
+            v-for="(phase, index) in allPhases"
             :key="phase.value"
             class="flex items-center"
           >
-            <UBadge 
+            <UBadge
               :color="getPhaseColor(phase.value, selectedPhase)"
               :variant="getPhaseVariant(phase.value, selectedPhase)"
               size="sm"
             >
               {{ phase.label }}
             </UBadge>
-            <Icon 
+            <Icon
               v-if="index < allPhases.length - 1"
-              name="i-lucide-chevron-right" 
-              class="h-3 w-3 mx-1 text-gray-400" 
+              name="i-lucide-chevron-right"
+              class="h-3 w-3 mx-1 text-gray-400"
             />
           </div>
         </div>
@@ -59,6 +71,7 @@
         </p>
       </div>
     </div>
+    </template>
 
     <template #footer>
       <div class="flex justify-end space-x-2">
@@ -70,7 +83,7 @@
           Cancel
         </UButton>
         <UButton
-          :loading="isUpdating"
+          :loading="updatePhaseMutation.isPending.value"
           :disabled="!selectedPhase"
           @click="updatePhase"
         >
@@ -83,10 +96,15 @@
 
 <script lang="ts" setup>
 import type { ProjectPhase } from '~~/types/project'
+import { useApi } from '~/api'
 
 interface Props {
   projectId: string
   currentPhase: ProjectPhase
+  triggerText?: string
+  triggerIcon?: string
+  triggerVariant?: string
+  triggerColor?: string
 }
 
 interface Emits {
@@ -94,18 +112,24 @@ interface Emits {
   error: [error: string]
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  triggerText: 'Update Phase',
+  triggerIcon: 'i-lucide-route',
+  triggerVariant: 'outline',
+  triggerColor: 'secondary'
+})
 const emit = defineEmits<Emits>()
 
-const nuxtApp = useNuxtApp()
-const $api = nuxtApp.$api as any
+const api = useApi()
 const toast = useToast()
+
+// Use the mutation hook for updating project phase
+const updatePhaseMutation = api.projects.updatePhase()
 
 // Modal state
 const isOpen = ref(false)
 const selectedPhase = ref<ProjectPhase>(props.currentPhase)
 const notes = ref('')
-const isUpdating = ref(false)
 
 // Phase options in logical order
 const allPhases = [
@@ -140,7 +164,7 @@ const getPhaseColor = (phase: ProjectPhase, selectedPhase: ProjectPhase) => {
   const phaseIndex = allPhases.findIndex(p => p.value === phase)
   const selectedIndex = allPhases.findIndex(p => p.value === selectedPhase)
   const currentIndex = allPhases.findIndex(p => p.value === props.currentPhase)
-  
+
   if (phase === selectedPhase) return 'primary'
   if (phaseIndex <= currentIndex) return 'success'
   return 'neutral'
@@ -167,47 +191,43 @@ const cancel = () => {
   notes.value = ''
 }
 
-const updatePhase = async () => {
+const updatePhase = () => {
   if (!selectedPhase.value) return
 
-  isUpdating.value = true
+  updatePhaseMutation.mutate({
+    id: props.projectId,
+    phase: selectedPhase.value,
+    notes: notes.value.trim() || undefined
+  }, {
+    onSuccess: () => {
+      emit('success', selectedPhase.value)
 
-  try {
-    await $api.projects.updatePhase.mutate({
-      id: props.projectId,
-      phase: selectedPhase.value,
-      notes: notes.value.trim() || undefined
-    })
+      toast.add({
+        title: 'Phase Updated',
+        description: `Project phase changed to ${allPhases.find(p => p.value === selectedPhase.value)?.label}`,
+        color: 'success',
+        icon: 'i-lucide-check'
+      })
 
-    emit('success', selectedPhase.value)
-    
-    toast.add({
-      title: 'Phase Updated',
-      description: `Project phase changed to ${allPhases.find(p => p.value === selectedPhase.value)?.label}`,
-      color: 'success',
-      icon: 'i-lucide-check'
-    })
+      isOpen.value = false
+      selectedPhase.value = props.currentPhase
+      notes.value = ''
+    },
+    onError: (error: any) => {
+      console.error('Failed to update project phase:', error)
 
-    isOpen.value = false
-  } catch (error) {
-    console.error('Failed to update project phase:', error)
-    
-    const errorMessage = error instanceof Error ? error.message : 'Failed to update project phase'
-    emit('error', errorMessage)
-    
-    toast.add({
-      title: 'Update Failed',
-      description: errorMessage,
-      color: 'error',
-      icon: 'i-lucide-x'
-    })
-  } finally {
-    isUpdating.value = false
-  }
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update project phase'
+      emit('error', errorMessage)
+
+      toast.add({
+        title: 'Update Failed',
+        description: errorMessage,
+        color: 'error',
+        icon: 'i-lucide-x'
+      })
+    }
+  })
 }
 
-// Expose methods to parent
-defineExpose({
-  open
-})
+// No need to expose methods - button is included in component
 </script>

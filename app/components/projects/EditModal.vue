@@ -1,10 +1,22 @@
 <template>
+  <!-- Trigger Button -->
+  <UButton
+    :icon="triggerIcon"
+    :color="triggerColor"
+    :variant="triggerVariant"
+    @click="open"
+  >
+    {{ triggerText }}
+  </UButton>
+
+  <!-- Modal -->
   <UModal
     v-model:open="isOpen"
     title="Edit Project"
     description="Update project information and settings"
     class="max-w-2xl"
   >
+    <template #body>
     <UForm
       id="edit-project-form"
       :schema="updateProjectSchema"
@@ -45,7 +57,7 @@
           >
             <USelect
               v-model="state.type"
-              :options="projectTypeOptions"
+              :items="projectTypeOptions"
               placeholder="Select project type"
             />
           </UFormField>
@@ -56,7 +68,7 @@
           >
             <USelect
               v-model="state.priority"
-              :options="priorityOptions"
+              :items="priorityOptions"
               placeholder="Select priority"
             />
           </UFormField>
@@ -122,7 +134,7 @@
             >
               <USelect
                 v-model="state.currency"
-                :options="currencyOptions"
+                :items="currencyOptions"
                 placeholder="Select currency"
               />
             </UFormField>
@@ -130,6 +142,7 @@
         </div>
       </div>
     </UForm>
+    </template>
 
     <template #footer>
       <div class="flex justify-end space-x-2">
@@ -141,7 +154,7 @@
           Cancel
         </UButton>
         <UButton
-          :loading="isUpdating"
+          :loading="updateProjectMutation.isPending.value"
           form="edit-project-form"
           type="submit"
         >
@@ -161,21 +174,32 @@ import { useApi } from '~/api'
 
 interface Props {
   project: ProjectDTO
+  triggerText?: string
+  triggerIcon?: string
+  triggerVariant?: string
+  triggerColor?: string
 }
 
 interface Emits {
   success: []
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  triggerText: 'Edit Project',
+  triggerIcon: 'i-lucide-pencil',
+  triggerVariant: 'outline',
+  triggerColor: 'neutral'
+})
 const emit = defineEmits<Emits>()
 
 const api = useApi()
 const toast = useToast()
 
+// Use the mutation hook for updating projects
+const updateProjectMutation = api.projects.update()
+
 // Modal state
 const isOpen = ref(false)
-const isUpdating = ref(false)
 
 // Form state
 const state = reactive<Partial<UpdateProjectDTO>>({
@@ -315,7 +339,7 @@ const onError = (error: any) => {
   })
 }
 
-const onSubmit = async (event: FormSubmitEvent<UpdateProjectDTO>) => {
+const onSubmit = (event: FormSubmitEvent<UpdateProjectDTO>) => {
   if (!validateDates.value) {
     toast.add({
       title: 'Invalid Dates',
@@ -326,37 +350,31 @@ const onSubmit = async (event: FormSubmitEvent<UpdateProjectDTO>) => {
     return
   }
 
-  isUpdating.value = true
+  updateProjectMutation.mutate(event.data, {
+    onSuccess: () => {
+      emit('success')
+      
+      toast.add({
+        title: 'Project Updated',
+        description: 'Project information has been updated successfully',
+        color: 'success',
+        icon: 'i-lucide-check'
+      })
 
-  try {
-    await api.projects.update().mutateAsync(event.data)
-
-    emit('success')
-    
-    toast.add({
-      title: 'Project Updated',
-      description: 'Project information has been updated successfully',
-      color: 'success',
-      icon: 'i-lucide-check'
-    })
-
-    isOpen.value = false
-  } catch (error) {
-    console.error('Failed to update project:', error)
-    
-    toast.add({
-      title: 'Update Failed',
-      description: error instanceof Error ? error.message : 'Failed to update project',
-      color: 'error',
-      icon: 'i-lucide-x'
-    })
-  } finally {
-    isUpdating.value = false
-  }
+      isOpen.value = false
+    },
+    onError: (error: any) => {
+      console.error('Failed to update project:', error)
+      
+      toast.add({
+        title: 'Update Failed',
+        description: error instanceof Error ? error.message : 'Failed to update project',
+        color: 'error',
+        icon: 'i-lucide-x'
+      })
+    }
+  })
 }
 
-// Expose methods
-defineExpose({
-  open
-})
+// No need to expose methods - button is included in component
 </script>

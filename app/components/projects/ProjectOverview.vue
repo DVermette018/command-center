@@ -7,14 +7,14 @@
         <p class="text-gray-600" v-if="project.description">{{ project.description }}</p>
       </div>
       <div class="flex items-center gap-3">
-        <UBadge 
+        <UBadge
           :color="getStatusColor(project.status)"
           variant="solid"
           size="lg"
         >
           {{ getStatusLabel(project.status) }}
         </UBadge>
-        <UBadge 
+        <UBadge
           :color="getPhaseColor(project.phase)"
           variant="outline"
           size="lg"
@@ -26,32 +26,21 @@
 
     <!-- Quick Actions -->
     <div class="flex flex-wrap gap-2">
-      <UButton
-        ref="statusModalTrigger"
-        icon="i-lucide-flag"
-        color="primary"
-        variant="outline"
-        @click="openStatusModal"
-      >
-        Update Status
-      </UButton>
-      <UButton
-        ref="phaseModalTrigger"
-        icon="i-lucide-workflow"
-        color="primary"
-        variant="outline"
-        @click="openPhaseModal"
-      >
-        Update Phase
-      </UButton>
-      <UButton
-        icon="i-lucide-edit"
-        color="primary"
-        variant="outline"
-        @click="openEditModal"
-      >
-        Edit Project
-      </UButton>
+      <ProjectsStatusModal
+        :project-id="project.id"
+        :current-status="project.status"
+        @success="handleStatusUpdate"
+      />
+      <ProjectsPhaseModal
+        :project-id="project.id"
+        :current-phase="project.phase"
+        trigger-icon="i-lucide-workflow"
+        @success="handlePhaseUpdate"
+      />
+      <ProjectsEditModal
+        :project="project"
+        @success="handleProjectUpdate"
+      />
     </div>
 
     <!-- Project Stats Cards -->
@@ -70,7 +59,7 @@
               <p class="text-xs text-gray-600">{{ formatDate(project.startDate) }}</p>
             </div>
           </div>
-          
+
           <div v-if="project.targetEndDate" class="flex items-center gap-2">
             <Icon name="i-lucide-target" class="h-4 w-4 text-blue-500" />
             <div>
@@ -78,7 +67,7 @@
               <p class="text-xs text-gray-600">{{ formatDate(project.targetEndDate) }}</p>
             </div>
           </div>
-          
+
           <div v-if="project.actualEndDate" class="flex items-center gap-2">
             <Icon name="i-lucide-calendar-check" class="h-4 w-4 text-purple-500" />
             <div>
@@ -110,7 +99,7 @@
               <p class="text-xs text-gray-600">Project Manager</p>
             </div>
           </div>
-          
+
           <div class="flex items-center gap-2">
             <Icon name="i-lucide-users" class="h-4 w-4 text-blue-500" />
             <div>
@@ -164,20 +153,20 @@
       <div v-if="isLoadingPhases" class="p-4 text-center">
         <UButton loading variant="ghost">Loading phase history...</UButton>
       </div>
-      
-      <div v-else-if="phaseHistory.length === 0" class="p-8 text-center text-gray-500">
+
+      <div v-else-if="phaseHistory?.length === 0" class="p-8 text-center text-gray-500">
         <Icon name="i-lucide-timeline" class="h-8 w-8 mx-auto mb-2 opacity-50" />
         <p>No phase history available</p>
       </div>
-      
+
       <div v-else class="space-y-4">
-        <div 
-          v-for="phase in phaseHistory" 
+        <div
+          v-for="phase in phaseHistory"
           :key="phase.id"
           class="flex items-center gap-4 p-3 border rounded-lg"
         >
           <div class="flex-shrink-0">
-            <UBadge 
+            <UBadge
               :color="getPhaseStatusColor(phase.status)"
               variant="solid"
             >
@@ -196,26 +185,7 @@
       </div>
     </UPageCard>
 
-    <!-- Modals -->
-    <ProjectsStatusModal 
-      ref="statusModal"
-      :project-id="project.id"
-      :current-status="project.status"
-      @success="handleStatusUpdate"
-    />
-    
-    <ProjectsPhaseModal 
-      ref="phaseModal"
-      :project-id="project.id"
-      :current-phase="project.phase"
-      @success="handlePhaseUpdate"
-    />
-
-    <ProjectEditModal
-      ref="editModal"
-      :project="project"
-      @success="handleProjectUpdate"
-    />
+    <!-- All modals are now self-contained with built-in triggers -->
   </div>
 </template>
 
@@ -237,10 +207,7 @@ const emit = defineEmits<Emits>()
 
 const api = useApi()
 
-// Refs for modals
-const statusModal = ref()
-const phaseModal = ref()
-const editModal = ref()
+// No modal refs needed - all modals are self-contained
 
 // Phase history data
 const { data: phaseHistory, isLoading: isLoadingPhases } = api.projects.getPhaseHistory({ projectId: props.project.id })
@@ -337,24 +304,13 @@ const formatCurrency = (amount: number, currency: string) => {
 const getPhaseProgressDescription = () => {
   const phase = getPhaseLabel(props.project.phase)
   const progress = phaseProgress.value
-  
+
   if (progress < 30) return `Early stage - ${phase}`
   if (progress < 70) return `Mid-stage - ${phase}`
   return `Advanced stage - ${phase}`
 }
 
-// Modal handlers
-const openStatusModal = () => {
-  statusModal.value?.open()
-}
-
-const openPhaseModal = () => {
-  phaseModal.value?.open()
-}
-
-const openEditModal = () => {
-  editModal.value?.open()
-}
+// No modal handlers needed - all modals are self-contained
 
 const handleStatusUpdate = (newStatus: ProjectStatus) => {
   emit('updated')

@@ -41,15 +41,7 @@ const links = [[{
 const api = useApi()
 
 // Fetch project data
-const { data: project, error, status, refetch } = await api.projects.getById(projectId)
-
-// Handle project not found
-if (error.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Project not found'
-  })
-}
+const { data: project, error, status, refetch } = api.projects.getById(projectId)
 
 // Current tab state
 const currentTab = computed(() => {
@@ -65,7 +57,7 @@ const handleProjectUpdate = () => {
 }
 
 // Handle errors appropriately
-if (status.value === 'error' || !project.value) {
+if (status.value === 'error') {
   throw createError({
     statusCode: 404,
     statusMessage: 'Project not found'
@@ -100,14 +92,14 @@ if (status.value === 'error' || !project.value) {
     <template #body>
       <div v-if="project" class="p-6">
         <!-- Overview Tab (default) -->
-        <ProjectsProjectOverview 
+        <ProjectsProjectOverview
           v-if="currentTab === 'overview'"
           :project="project"
           @updated="handleProjectUpdate"
         />
 
         <!-- Team Tab -->
-        <ProjectsTeamManagement 
+        <ProjectsTeamManagement
           v-else-if="currentTab === 'team'"
           :project-id="projectId"
           :project="project"
@@ -124,7 +116,7 @@ if (status.value === 'error' || !project.value) {
           <NuxtPage />
         </div>
       </div>
-      
+
       <div v-else class="p-6 text-center">
         <UButton loading variant="ghost">Loading project...</UButton>
       </div>

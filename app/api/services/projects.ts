@@ -73,13 +73,13 @@ export const projectQueries = defineService({
 export const projectService: ProjectService = {
   getAll: (p: Pagination) => projectQueries.useGetAllQuery(p),
   getById: (id: string) => projectQueries.useGetByIdQuery(id),
+  getTeamMembers: (projectId: string) => projectQueries.useGetTeamMembersQuery(projectId),
+  getPhaseHistory: (projectId: string) => projectQueries.useGetPhaseHistoryQuery(projectId),
   create: () => projectQueries.useStoreMutation(),
   update: () => projectQueries.useUpdateMutation(),
   updateStatus: () => projectQueries.useUpdateStatusMutation(),
   updatePhase: () => projectQueries.useUpdatePhaseMutation(),
   addTeamMember: () => projectQueries.useAddTeamMemberMutation(),
   removeTeamMember: () => projectQueries.useRemoveTeamMemberMutation(),
-  getTeamMembers: (projectId: string) => projectQueries.useGetTeamMembersQuery(projectId),
-  getPhaseHistory: (projectId: string) => projectQueries.useGetPhaseHistoryQuery(projectId),
   delete: () => projectQueries.useDeleteMutation(),
 }
