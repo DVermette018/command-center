@@ -2,6 +2,13 @@
 // import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
 import { useQueryClient } from '@tanstack/vue-query'
 
+// Extend Window interface for TanStack Query Client
+declare global {
+  interface Window {
+    __TANSTACK_QUERY_CLIENT__?: any
+  }
+}
+
 const colorMode = useColorMode()
 
 const color = computed(() => colorMode.value === 'dark' ? '#1b1718' : 'white')

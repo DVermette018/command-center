@@ -3,7 +3,6 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import { type CreateProjectDTO, createProjectSchema } from '~~/dto/project'
 import type { SelectOption } from '~~/types/common'
 import DatePicker from '~/components/shared/DatePicker.vue'
-import { CalendarDate } from '@internationalized/date'
 import { useApi } from '~/api'
 import type { ListUserDTO } from '~~/dto/user'
 
@@ -23,14 +22,10 @@ const createProjectMutation = api.projects.create()
 const state = reactive<CreateProjectDTO>({
   customerId: props.customerId,
   name: '',
-  description: '',
   type: 'WEBSITE',
-  startDate: new CalendarDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()),
+  startDate: new Date(),
   targetEndDate: undefined,
-  actualEndDate: undefined,
-  projectManagerId: undefined,
-  budget: undefined,
-  currency: 'MXN'
+  projectManagerId: ''
 })
 
 const projectManagers = ref<SelectOption[]>([])
@@ -113,7 +108,7 @@ const currencyOptions = [
 // Date validation
 const validateDates = computed(() => {
   if (state.startDate && state.targetEndDate) {
-    return new Date(state.startDate) <= new Date(state.targetEndDate)
+    return state.startDate <= state.targetEndDate
   }
   return true
 })
@@ -170,10 +165,9 @@ const resetForm = (): void => {
   state.customerId = props.customerId
   state.name = ''
   state.type = 'WEBSITE'
-
-  state.startDate = undefined
+  state.startDate = new Date()
   state.targetEndDate = undefined
-  state.projectManagerId = 'none'
+  state.projectManagerId = ''
 }
 
 // Reset form when modal closes

@@ -12,7 +12,7 @@ const UCheckbox = resolveComponent('UCheckbox')
 
 const api = useApi()
 const toast = useToast()
-const table = useTemplateRef('table')
+const table = useTemplateRef<any>('table')
 
 const columnVisibility = ref()
 const rowSelection = ref({})
@@ -29,7 +29,7 @@ const paginationParams = reactive({
 
 const { data, isLoading, status, error, refetch } = api.customers.getAll(paginationParams)
 
-const selectedRowsCount = computed(() => {
+const selectedRowsCount = computed((): number => {
   return table.value?.tableApi?.getFilteredSelectedRowModel().rows.length || 0
 })
 
@@ -282,8 +282,8 @@ const handlePageChange = (page: number) => {
         :items="
           table?.tableApi
             ?.getAllColumns()
-            .filter((column) => column.getCanHide())
-            .map((column) => ({
+            .filter((column: any) => column.getCanHide())
+            .map((column: any) => ({
               label: upperFirst(column.id),
               type: 'checkbox' as const,
               checked: column.getIsVisible(),

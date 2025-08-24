@@ -15,7 +15,10 @@ const createCustomerMutation = api.customers.create()
 const state = reactive<CreateCustomerSchema>({
   business: {
     businessName: '',
+    ownerName: '', // Add missing ownerName
     legalName: undefined,
+    phone: undefined,
+    email: undefined,
     taxId: undefined,
     website: undefined,
     category: '',
@@ -32,17 +35,26 @@ const state = reactive<CreateCustomerSchema>({
       zipCode: '',
       country: 'MX',
       reference: ''
-    }
+    },
+    slogan: undefined,
+    missionStatement: undefined,
+    primaryColor: undefined,
+    secondaryColor: undefined,
+    accentColor: undefined,
+    additionalColors: undefined
   },
   status: 'LEAD',
   source: undefined,
 
   // Contact information (will create a CustomerContact)
   contact: {
-    name: '',
+    id: '',
+    customerId: '',
     email: '',
-    phone: '',
-    position: '',
+    firstName: '',
+    lastName: '',
+    position: undefined,
+    department: undefined,
     isPrimary: true
   }
 })
@@ -161,8 +173,12 @@ const resetForm = (): void => {
   state.source = undefined
   state.business = {
     businessName: '',
+    ownerName: '',
     legalName: undefined,
+    phone: undefined,
+    email: undefined,
     taxId: undefined,
+    website: undefined,
     category: '',
     customCategory: undefined,
     size: undefined,
@@ -176,7 +192,23 @@ const resetForm = (): void => {
       zipCode: '',
       country: 'MX',
       reference: ''
-    }
+    },
+    slogan: undefined,
+    missionStatement: undefined,
+    primaryColor: undefined,
+    secondaryColor: undefined,
+    accentColor: undefined,
+    additionalColors: undefined
+  }
+  state.contact = {
+    id: '',
+    customerId: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    position: undefined,
+    department: undefined,
+    isPrimary: true
   }
 }
 // console.log(createCustomerSchema.safeParse?.({}))
@@ -252,6 +284,38 @@ watch(open, (newValue) => {
                 v-model="state.business.ownerName"
                 class="w-full max-w-sm"
                 placeholder="Juan Pérez"
+              />
+            </UFormField>
+
+            <USeparator/>
+            
+            <UFormField
+              class="flex max-sm:flex-col justify-between items-start gap-4"
+              description="Teléfono de la empresa"
+              label="Teléfono"
+              name="business.phone"
+            >
+              <UInput
+                v-model="state.business.phone"
+                class="w-full max-w-sm"
+                placeholder="(33) 1234-5678"
+                type="tel"
+              />
+            </UFormField>
+            
+            <USeparator/>
+            
+            <UFormField
+              class="flex max-sm:flex-col justify-between items-start gap-4"
+              description="Email de la empresa"
+              label="Email"
+              name="business.email"
+            >
+              <UInput
+                v-model="state.business.email"
+                class="w-full max-w-sm"
+                placeholder="info@empresa.com"
+                type="email"
               />
             </UFormField>
 
@@ -403,19 +467,7 @@ watch(open, (newValue) => {
 
             <USeparator/>
 
-            <UFormField
-              class="flex max-sm:flex-col justify-between items-start gap-4"
-              description="Número de teléfono"
-              label="Teléfono"
-              name="contact.phone"
-            >
-              <UInput
-                v-model="state.contact.phone"
-                class="w-full max-w-sm"
-                placeholder="(33) 1234-5678"
-                type="tel"
-              />
-            </UFormField>
+<!-- Note: Phone is not part of the contact schema, it's in the business schema -->
 
             <USeparator/>
 
