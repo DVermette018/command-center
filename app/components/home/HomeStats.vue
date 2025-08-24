@@ -54,8 +54,8 @@ const { data: stats } = await useAsyncData<Stat[]>('stats', async () => {
     status: 'ACTIVE',
     period: props.period,
     range: {
-      start: props.range.start.toISOString(),
-      end: props.range.end.toISOString()
+      start: props.range.start instanceof Date ? props.range.start.toISOString() : props.range.start,
+      end: props.range.end instanceof Date ? props.range.end.toISOString() : props.range.end
     }
   })
 
