@@ -6,7 +6,7 @@ export const transformDates = <T extends Record<string, any>> (obj: T): T => {
 
   for (const key in transformed) {
     const value = transformed[key]
-    if (value instanceof Date) {
+    if (value && typeof value === 'object' && (value as any) instanceof Date) {
       (transformed as any)[key] = value.toISOString()
     } else if (value && typeof value === 'object' && !Array.isArray(value)) {
       (transformed as any)[key] = transformDates(value)

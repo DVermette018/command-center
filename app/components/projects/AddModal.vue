@@ -5,6 +5,7 @@ import type { SelectOption } from '~~/types/common'
 import DatePicker from '~/components/shared/DatePicker.vue'
 import { useApi } from '~/api'
 import type { ListUserDTO } from '~~/dto/user'
+import { CalendarDate } from '@internationalized/date'
 
 const props = defineProps<{
   customerId: string
@@ -26,6 +27,37 @@ const state = reactive<CreateProjectDTO>({
   startDate: new Date(),
   targetEndDate: undefined,
   projectManagerId: ''
+})
+
+// Calendar date conversion for DatePicker components
+const startDateCalendar = computed({
+  get: () => {
+    if (!state.startDate) return null
+    const date = state.startDate instanceof Date ? state.startDate : new Date(state.startDate)
+    return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate())
+  },
+  set: (value) => {
+    if (value) {
+      state.startDate = new Date(value.year, value.month - 1, value.day)
+    } else {
+      state.startDate = undefined
+    }
+  }
+})
+
+const targetEndDateCalendar = computed({
+  get: () => {
+    if (!state.targetEndDate) return null
+    const date = state.targetEndDate instanceof Date ? state.targetEndDate : new Date(state.targetEndDate)
+    return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate())
+  },
+  set: (value) => {
+    if (value) {
+      state.targetEndDate = new Date(value.year, value.month - 1, value.day)
+    } else {
+      state.targetEndDate = undefined
+    }
+  }
 })
 
 const projectManagers = ref<SelectOption[]>([])
@@ -262,7 +294,7 @@ watch(open, (newValue) => {
               name="startDate"
             >
 
-              <DatePicker v-model="state.startDate" class="w-full max-w-sm" />
+              <DatePicker v-model="startDateCalendar" class="w-full max-w-sm" />
             </UFormField>
 
             <USeparator/>
@@ -274,7 +306,7 @@ watch(open, (newValue) => {
               label="Fecha Objetivo"
               name="targetEndDate"
             >
-              <DatePicker v-model="state.targetEndDate" class="w-full max-w-sm" />
+              <DatePicker v-model="targetEndDateCalendar" class="w-full max-w-sm" />
             </UFormField>
 
           </UPageCard>

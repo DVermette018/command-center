@@ -131,11 +131,11 @@ export const register = (db: PrismaClient) => ({
             ...contact,
             position: contact.position ?? undefined,
             department: contact.department ?? undefined,
-            user: {
+            user: contact.user ? {
               ...contact.user,
               createdAt: contact.user.createdAt.toISOString(),
               updatedAt: contact.user.updatedAt.toISOString()
-            }
+            } : undefined
           })),
           businessProfile: c.businessProfile ? {
             businessName: c.businessProfile.businessName,
@@ -207,7 +207,7 @@ export const register = (db: PrismaClient) => ({
             ...contact.user,
             createdAt: contact.user.createdAt.toISOString(),
             updatedAt: contact.user.updatedAt.toISOString()
-          } : null
+          } : undefined
         })),
         businessProfile: c.businessProfile ? {
           businessName: c.businessProfile.businessName,
