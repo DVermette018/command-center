@@ -37,6 +37,20 @@ const filteredRowsCount = computed(() => {
   return table.value?.tableApi?.getFilteredRowModel().rows.length || 0
 })
 
+// Status change modal state
+const statusModalOpen = ref(false)
+const selectedCustomer = ref<CustomerDTO | null>(null)
+
+const openStatusModal = (customer: CustomerDTO) => {
+  selectedCustomer.value = customer
+  statusModalOpen.value = true
+}
+
+const onStatusChanged = (updatedCustomer: CustomerDTO) => {
+  // Refresh the table data to show updated status
+  refetch()
+}
+
 const getRowItems = (row: Row<CustomerDTO>) => {
   return [
     {
@@ -62,6 +76,13 @@ const getRowItems = (row: Row<CustomerDTO>) => {
       icon: 'i-lucide-list',
       onSelect: () => {
         navigateTo(`/customers/${row.original.id}`)
+      }
+    },
+    {
+      label: 'Change status',
+      icon: 'i-lucide-refresh-cw',
+      onSelect: () => {
+        openStatusModal(row.original)
       }
     },
     {
@@ -342,6 +363,14 @@ const handlePageChange = (page: number) => {
       />
     </div>
   </div>
+
+  <!-- Status Change Modal -->
+  <CustomersStatusModal
+    v-if="selectedCustomer"
+    v-model:open="statusModalOpen"
+    :customer="selectedCustomer"
+    @status-changed="onStatusChanged"
+  />
 </template>
 
 <style scoped>
