@@ -17,6 +17,7 @@ export interface CustomerService {
   getAll: (pagination: Pagination) => ReturnType<typeof customerQueries.useGetAllQuery>
   getById: (id: string) => ReturnType<typeof customerQueries.useGetByIdQuery>
   create: () => ReturnType<typeof customerQueries.useCreateMutation>
+  updateStatus: () => ReturnType<typeof customerQueries.useUpdateStatusMutation>
 }
 
 export const customerQueries = defineService({
@@ -44,18 +45,14 @@ export const customerQueries = defineService({
   },
   mutations: {
     create: {
-      request: (payload: CreateCustomerSchema) => trpc().customers.store.mutate(payload),
+      request: (payload: CreateCustomerSchema) => trpc().customers.create.mutate(payload),
       cacheKey: () => [['CUSTOMERS_GET_ALL']]
     },
-    // update: {
-    //   request: (payload: UpdateCustomerSchema) =>
-    //     trpc().customers.update.mutate(payload),
-    //   cacheKey: (_payload, res) => [['CUSTOMERS_GET_ALL'], ['CUSTOMER_DETAIL', (res as Customer).id]]
-    // },
-    // delete: {
-    //   request: (id: number) => trpc().customers.delete.mutate(id),
-    //   cacheKey: (id) => [['CUSTOMERS_GET_ALL'], ['CUSTOMER_DETAIL', id]]
-    // }
+    updateStatus: {
+      request: (payload: { id: string; status: CustomerStatus; reason?: string }) => 
+        trpc().customers.updateStatus.mutate(payload),
+      cacheKey: (_payload, res) => [['CUSTOMERS_GET_ALL'], ['CUSTOMER_DETAIL', (res as CustomerDTO).id]]
+    }
   }
 })
 
@@ -64,4 +61,5 @@ export const customerService: CustomerService = {
   getAll: (p: Pagination) => customerQueries.useGetAllQuery(p),
   getById: (id: string) => customerQueries.useGetByIdQuery(id),
   create: () => customerQueries.useCreateMutation(),
+  updateStatus: () => customerQueries.useUpdateStatusMutation(),
 }
