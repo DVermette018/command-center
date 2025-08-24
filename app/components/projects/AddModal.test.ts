@@ -146,8 +146,7 @@ describe('ProjectsAddModal Types and Business Logic', () => {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john@test.com',
-          role: 'PROJECT_MANAGER',
-          isActive: true
+          role: 'PROJECT_MANAGER'
         }
       ]
 
