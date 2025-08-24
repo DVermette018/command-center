@@ -8,8 +8,6 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxtjs/mdc',
-    // Only load test utils when in test environment
-    ...(process.env.NODE_ENV === 'test' ? ['@nuxt/test-utils'] : [])
   ],
 
   devtools: {
