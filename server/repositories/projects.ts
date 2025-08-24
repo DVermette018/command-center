@@ -323,7 +323,7 @@ export const register = (db: PrismaClient) => ({
         currency: p.currency,
         createdAt: p.createdAt,
         updatedAt: p.updatedAt
-      })
+      }) as any
     } catch (error) {
       console.error('Error updating project:', error)
       throw error
@@ -399,7 +399,7 @@ export const register = (db: PrismaClient) => ({
         currency: p.currency,
         createdAt: p.createdAt,
         updatedAt: p.updatedAt
-      })
+      }) as any
     } catch (error) {
       console.error('Error updating project status:', error)
       throw error
@@ -486,7 +486,7 @@ export const register = (db: PrismaClient) => ({
         currency: p.currency,
         createdAt: p.createdAt,
         updatedAt: p.updatedAt
-      })
+      }) as any
     } catch (error) {
       console.error('Error updating project phase:', error)
       throw error
@@ -531,7 +531,7 @@ export const register = (db: PrismaClient) => ({
         },
         joinedAt: teamMember.joinedAt,
         leftAt: teamMember.leftAt
-      })
+      }) as any
     } catch (error) {
       console.error('Error adding team member:', error)
       throw error
@@ -597,7 +597,7 @@ export const register = (db: PrismaClient) => ({
         },
         joinedAt: tm.joinedAt,
         leftAt: tm.leftAt
-      }))
+      }) as any)
     } catch (error) {
       console.error('Error fetching team members:', error)
       throw error

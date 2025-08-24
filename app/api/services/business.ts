@@ -10,6 +10,7 @@ const trpc = () => useNuxtApp().$trpc
 
 export interface BusinessService {
   store: () => ReturnType<typeof businessQueries.useStoreMutation>
+  create: () => ReturnType<typeof businessQueries.useCreateMutation>
 }
 
 export const businessQueries = defineService({
@@ -18,12 +19,17 @@ export const businessQueries = defineService({
   },
   mutations: {
     store: {
-      request: (payload: CreateCustomerSchema) => trpc().customers.store.mutate(payload),
-      cacheKey: () => [['CUSTOMERS_GET_ALL']]
+      request: (payload: CreateBusinessProfileDTO) => trpc().business.store.mutate(payload),
+      cacheKey: () => [['BUSINESSES_GET_ALL']]
+    },
+    create: {
+      request: (payload: CreateBusinessProfileDTO) => trpc().business.store.mutate(payload),
+      cacheKey: () => [['BUSINESSES_GET_ALL']]
     },
   }
 })
 
 export const businessService: BusinessService = {
   store: () => businessQueries.useStoreMutation(),
+  create: () => businessQueries.useCreateMutation(),
 }

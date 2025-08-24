@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { upperFirst } from 'scule'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
-import type { Customer } from '~~/types/customers'
+import type { CustomerDTO } from '~~/dto/customer'
 import type { TableColumn } from '@nuxt/ui'
 import { useApi } from '~/api'
 
@@ -37,7 +37,7 @@ const filteredRowsCount = computed(() => {
   return table.value?.tableApi?.getFilteredRowModel().rows.length || 0
 })
 
-const getRowItems = (row: Row<Customer>) => {
+const getRowItems = (row: Row<CustomerDTO>) => {
   return [
     {
       type: 'label',
@@ -85,7 +85,7 @@ const getRowItems = (row: Row<Customer>) => {
   ]
 }
 
-const columns: TableColumn<Customer>[] = [
+const columns: TableColumn<CustomerDTO>[] = [
   {
     id: 'select',
     header: ({ table }) =>
@@ -183,7 +183,7 @@ const columns: TableColumn<Customer>[] = [
 const statusFilter = ref('all')
 const nameFilter = ref('')
 
-const onRowClick = (row: Row<Customer>) => {
+const onRowClick = (row: Row<CustomerDTO>) => {
   navigateTo(`/customers/${row.original.id}`)
 }
 
@@ -337,7 +337,7 @@ const handlePageChange = (page: number) => {
     <div class="flex items-center gap-1.5">
       <UPagination
         :page="pagination.pageIndex + 1"
-        :page-count="Math.ceil((data?.pagination?.total || 0) / pagination.pageSize)"
+        :page-count="Math.ceil((data?.pagination?.totalCount || 0) / pagination.pageSize)"
         @update:page="handlePageChange"
       />
     </div>

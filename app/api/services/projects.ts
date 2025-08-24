@@ -48,11 +48,11 @@ export const projectQueries = defineService({
       cacheKey: (payload) => [['PROJECTS_GET_ALL'], ['PROJECTS_DETAIL', payload.id]]
     },
     updateStatus: {
-      request: (payload: { id: string; status: string; reason?: string }) => trpc().projects.updateStatus.mutate(payload),
+      request: (payload: { id: string; status: 'DRAFT' | 'PENDING_APPROVAL' | 'ACTIVE' | 'ON_HOLD' | 'COMPLETED' | 'CANCELLED' | 'ARCHIVED'; reason?: string }) => trpc().projects.updateStatus.mutate(payload),
       cacheKey: (payload) => [['PROJECTS_GET_ALL'], ['PROJECTS_DETAIL', payload.id]]
     },
     updatePhase: {
-      request: (payload: { id: string; phase: string; notes?: string }) => trpc().projects.updatePhase.mutate(payload),
+      request: (payload: { id: string; phase: 'DISCOVERY' | 'PLANNING' | 'DESIGN' | 'DEVELOPMENT' | 'REVIEW' | 'TESTING' | 'LAUNCH' | 'POST_LAUNCH' | 'MAINTENANCE'; notes?: string }) => trpc().projects.updatePhase.mutate(payload),
       cacheKey: (payload) => [['PROJECTS_GET_ALL'], ['PROJECTS_DETAIL', payload.id], ['PROJECT_PHASE_HISTORY', payload.id]]
     },
     addTeamMember: {

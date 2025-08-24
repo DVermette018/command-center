@@ -10,7 +10,11 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
-    "seed:questions": "ts-node prisma/seed-questions.ts"
+    "seed:questions": "ts-node prisma/seed-questions.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@ai-sdk/vue": "^2.0.14",
@@ -46,9 +50,15 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.4.1",
+    "@testing-library/vue": "^8.1.0",
+    "@vitest/ui": "^3.2.4",
+    "@vue/test-utils": "^2.4.6",
     "eslint": "^9.30.0",
+    "happy-dom": "^18.0.1",
+    "jsdom": "^26.1.0",
     "tsx": "^4.20.4",
     "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
     "vue-tsc": "^2.2.10"
   },
   "resolutions": {

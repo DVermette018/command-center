@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client'
-import { BillingCycle, Currency } from '~~/types/plans'
+import { PrismaClient, Currency, BillingCycle } from '@prisma/client'
 
 const db = new PrismaClient()
 
