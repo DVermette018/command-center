@@ -17,7 +17,7 @@ const UCheckbox = resolveComponent('UCheckbox')
 
 const api = useApi()
 const toast = useToast()
-const table = useTemplateRef('table')
+const table = useTemplateRef<any>('table')
 
 const columnVisibility = ref()
 const rowSelection = ref({})
@@ -35,7 +35,7 @@ const paginationParams = reactive({
 
 const { data, isLoading, status, error, refetch } = api.projects.getAll(paginationParams)
 
-const selectedRowsCount = computed(() => {
+const selectedRowsCount = computed((): number => {
   return table.value?.tableApi?.getFilteredSelectedRowModel().rows.length || 0
 })
 
