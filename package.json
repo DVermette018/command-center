@@ -11,10 +11,10 @@
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "seed:questions": "ts-node prisma/seed-questions.ts",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
-    "test:run": "vitest run"
+    "test": "NODE_ENV=test vitest",
+    "test:ui": "NODE_ENV=test vitest --ui",
+    "test:coverage": "NODE_ENV=test vitest --coverage",
+    "test:run": "NODE_ENV=test vitest run"
   },
   "dependencies": {
     "@ai-sdk/vue": "^2.0.14",
