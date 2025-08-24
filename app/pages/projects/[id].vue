@@ -3,19 +3,24 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 import { useApi } from '~/api'
 
 const route = useRoute()
+const router = useRouter()
 
-// File upload ref
 const projectId = route.params.id as string
+
+// Navigation tabs
 const links = [[{
-  label: 'Setup',
-  icon: 'i-lucide-settings',
-  to: `/projects/${projectId}/setup`,
-  exact: true
-}, {
   label: 'Overview',
   icon: 'i-lucide-eye',
-  to: `/projects/${projectId}/overview`,
-  disabled: true
+  to: `/projects/${projectId}`,
+  exact: true
+}, {
+  label: 'Team',
+  icon: 'i-lucide-users',
+  to: `/projects/${projectId}/team`
+}, {
+  label: 'Setup',
+  icon: 'i-lucide-settings',
+  to: `/projects/${projectId}/setup`
 }, {
   label: 'Plan',
   icon: 'i-lucide-credit-card',
@@ -31,23 +36,33 @@ const links = [[{
   icon: 'i-lucide-bar-chart-2',
   to: `/projects/${projectId}/analytics`,
   disabled: true
-}, {
-  label: 'Preview',
-  icon: 'i-lucide-eye-off',
-  to: `/projects/${projectId}/preview`,
-  disabled: true
-}, {
-  label: 'Settings',
-  icon: 'i-lucide-cog',
-  to: `/projects/${projectId}/settings`,
-  disabled: true
-}
-]] satisfies NavigationMenuItem[][]
+}]] satisfies NavigationMenuItem[][]
 
 const api = useApi()
 
-// Use the proper query hook for fetching project by ID
-const { data: project, error, status } = await api.projects.getById(projectId)
+// Fetch project data
+const { data: project, error, status, refetch } = await api.projects.getById(projectId)
+
+// Handle project not found
+if (error.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Project not found'
+  })
+}
+
+// Current tab state
+const currentTab = computed(() => {
+  const path = route.path
+  if (path.includes('/team')) return 'team'
+  if (path.includes('/setup')) return 'setup'
+  return 'overview'
+})
+
+// Handle project updates
+const handleProjectUpdate = () => {
+  refetch()
+}
 
 // Handle errors appropriately
 if (status.value === 'error' || !project.value) {
@@ -60,7 +75,7 @@ if (status.value === 'error' || !project.value) {
 </script>
 
 <template>
-  <UDashboardPanel id="customer">
+  <UDashboardPanel id="project-detail">
     <template #header>
       <UDashboardNavbar :title="project?.name || 'Loading...'" >
         <template #leading>
@@ -68,7 +83,13 @@ if (status.value === 'error' || !project.value) {
         </template>
 
         <template #right>
-
+          <UButton
+            icon="i-lucide-arrow-left"
+            variant="ghost"
+            @click="router.push('/projects')"
+          >
+            Back to Projects
+          </UButton>
         </template>
       </UDashboardNavbar>
       <UDashboardToolbar>
@@ -77,7 +98,36 @@ if (status.value === 'error' || !project.value) {
     </template>
 
     <template #body>
-        <NuxtPage />
+      <div v-if="project" class="p-6">
+        <!-- Overview Tab (default) -->
+        <ProjectsProjectOverview 
+          v-if="currentTab === 'overview'"
+          :project="project"
+          @updated="handleProjectUpdate"
+        />
+
+        <!-- Team Tab -->
+        <ProjectsTeamManagement 
+          v-else-if="currentTab === 'team'"
+          :project-id="projectId"
+          :project="project"
+          @updated="handleProjectUpdate"
+        />
+
+        <!-- Setup Tab (existing functionality) -->
+        <div v-else-if="currentTab === 'setup'">
+          <NuxtPage />
+        </div>
+
+        <!-- Fallback -->
+        <div v-else>
+          <NuxtPage />
+        </div>
+      </div>
+      
+      <div v-else class="p-6 text-center">
+        <UButton loading variant="ghost">Loading project...</UButton>
+      </div>
     </template>
   </UDashboardPanel>
 </template>
