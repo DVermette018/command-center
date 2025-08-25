@@ -12,40 +12,40 @@
   <!-- Modal -->
   <UModal
     v-model:open="isOpen"
-    :title="`Update Project Phase`"
-    :description="`Change project phase from ${currentPhase} to ${selectedPhase}`"
+    :title="$t('projects.phase_modal.title')"
+    :description="$t('projects.phase_modal.description', { currentPhase: allPhases.find(p => p.value === currentPhase)?.label, selectedPhase: allPhases.find(p => p.value === selectedPhase)?.label })"
   >
     <template #body>
     <div class="flex flex-col space-y-4">
       <!-- Phase Selection -->
       <UFormField
-        label="New Phase"
+        :label="$t('projects.phase_modal.label_new_phase')"
         name="phase"
         required
       >
         <USelect
           v-model="selectedPhase"
           :items="phaseOptions"
-          placeholder="Select new phase"
+          :placeholder="$t('projects.phase_modal.placeholder_phase')"
           class="w-full"
         />
       </UFormField>
 
       <!-- Notes -->
       <UFormField
-        label="Notes (Optional)"
+        :label="$t('projects.phase_modal.label_notes')"
         name="notes"
       >
         <UTextarea
           v-model="notes"
-          placeholder="Add any notes about this phase change..."
+          :placeholder="$t('projects.phase_modal.placeholder_notes')"
           :rows="3"
         />
       </UFormField>
 
       <!-- Phase Progress Preview -->
       <div class="p-4 bg-gray-50 rounded-lg">
-        <h4 class="text-sm font-medium mb-3">Project Phase Flow:</h4>
+        <h4 class="text-sm font-medium mb-3">{{ $t('projects.phase_modal.flow.title') }}</h4>
         <div class="flex flex-wrap gap-2">
           <div
             v-for="(phase, index) in allPhases"
@@ -80,14 +80,14 @@
           variant="subtle"
           @click="cancel"
         >
-          Cancel
+          {{ $t('common.actions.button_cancel') }}
         </UButton>
         <UButton
           :loading="updatePhaseMutation.isPending.value"
           :disabled="!selectedPhase"
           @click="updatePhase"
         >
-          Update Phase
+          {{ $t('projects.phase_modal.button_update') }}
         </UButton>
       </div>
     </template>
@@ -132,17 +132,18 @@ const selectedPhase = ref<ProjectPhase>(props.currentPhase)
 const notes = ref('')
 
 // Phase options in logical order
-const allPhases = [
-  { label: 'Discovery', value: 'DISCOVERY' },
-  { label: 'Planning', value: 'PLANNING' },
-  { label: 'Design', value: 'DESIGN' },
-  { label: 'Development', value: 'DEVELOPMENT' },
-  { label: 'Review', value: 'REVIEW' },
-  { label: 'Testing', value: 'TESTING' },
-  { label: 'Launch', value: 'LAUNCH' },
-  { label: 'Post-Launch', value: 'POST_LAUNCH' },
-  { label: 'Maintenance', value: 'MAINTENANCE' }
-]
+const { t } = useI18n()
+const allPhases = computed(() => [
+  { label: t('projects.phase_modal.phases.discovery'), value: 'DISCOVERY' },
+  { label: t('projects.phase_modal.phases.planning'), value: 'PLANNING' },
+  { label: t('projects.phase_modal.phases.design'), value: 'DESIGN' },
+  { label: t('projects.phase_modal.phases.development'), value: 'DEVELOPMENT' },
+  { label: t('projects.phase_modal.phases.review'), value: 'REVIEW' },
+  { label: t('projects.phase_modal.phases.testing'), value: 'TESTING' },
+  { label: t('projects.phase_modal.phases.launch'), value: 'LAUNCH' },
+  { label: t('projects.phase_modal.phases.post_launch'), value: 'POST_LAUNCH' },
+  { label: t('projects.phase_modal.phases.maintenance'), value: 'MAINTENANCE' }
+])
 
 const phaseOptions = allPhases
 
@@ -175,7 +176,8 @@ const getPhaseVariant = (phase: ProjectPhase, selectedPhase: ProjectPhase) => {
 }
 
 const getPhaseDescription = (phase: ProjectPhase) => {
-  return phaseMeta[phase]?.description || ''
+  const key = `projects.phase_modal.phase_descriptions.${phase.toLowerCase()}`
+  return t(key)
 }
 
 // Methods

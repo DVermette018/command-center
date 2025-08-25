@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { CustomerDTO } from '~~/dto/customer'
 import { useApi } from '~/api'
 
 const route = useRoute()
@@ -9,19 +8,13 @@ const toast = useToast()
 const customerId = computed(() => route.params.id as string)
 
 // Fetch customer data
-const { data: customer, isLoading, error, refetch } = api.customers.getById({ 
-  id: customerId.value 
-})
+const { data: customer, isLoading, error } = api.customers.getById(customerId.value)
 
 // Status change modal state
 const statusModalOpen = ref(false)
 
 const openStatusModal = () => {
   statusModalOpen.value = true
-}
-
-const onStatusChanged = (updatedCustomer: CustomerDTO) => {
-  refetch()
 }
 
 // Handle errors
@@ -60,14 +53,14 @@ definePageMeta({
 
     <!-- Error State -->
     <div v-else-if="error" class="text-center py-12">
-      <UIcon name="i-lucide-alert-triangle" class="text-4xl text-red-500 mb-4" />
+      <UIcon class="text-4xl text-red-500 mb-4" name="i-lucide-alert-triangle"/>
       <h2 class="text-xl font-semibold text-gray-900 mb-2">Customer Not Found</h2>
       <p class="text-gray-600 mb-4">The customer you're looking for doesn't exist or has been deleted.</p>
       <UButton
-        to="/customers"
+        color="primary"
         icon="i-lucide-arrow-left"
         label="Back to Customers"
-        color="primary"
+        to="/customers"
       />
     </div>
 
@@ -83,47 +76,47 @@ definePageMeta({
             <UBadge
               :color="{
                 LEAD: 'blue',
-                PROSPECT: 'yellow', 
+                PROSPECT: 'yellow',
                 ACTIVE: 'green',
                 INACTIVE: 'gray',
                 CHURNED: 'red'
               }[customer.status]"
-              variant="subtle"
               size="lg"
+              variant="subtle"
             >
               {{ {
-                LEAD: 'Prospecto',
-                PROSPECT: 'Cliente Potencial',
-                ACTIVE: 'Cliente Activo', 
-                INACTIVE: 'Inactivo',
-                CHURNED: 'Perdido'
-              }[customer.status] }}
+              LEAD: 'Prospecto',
+              PROSPECT: 'Cliente Potencial',
+              ACTIVE: 'Cliente Activo',
+              INACTIVE: 'Inactivo',
+              CHURNED: 'Perdido'
+            }[customer.status] }}
             </UBadge>
           </div>
           <p class="text-gray-600">
             {{ customer.businessProfile?.legalName || customer.businessProfile?.businessName }}
           </p>
           <p class="text-sm text-gray-500">
-            Cliente desde {{ new Date(customer.createdAt).toLocaleDateString('es-MX', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            }) }}
+            Cliente desde {{ new Date(customer.createdAt).toLocaleDateString('es-MX', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }) }}
           </p>
         </div>
 
         <div class="flex items-center gap-3">
           <UButton
+            color="neutral"
             icon="i-lucide-refresh-cw"
             label="Cambiar Estado"
-            color="neutral"
             variant="outline"
             @click="openStatusModal"
           />
           <UButton
+            color="primary"
             icon="i-lucide-edit"
             label="Editar"
-            color="primary"
             variant="outline"
           />
         </div>
@@ -132,18 +125,11 @@ definePageMeta({
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <UPageCard
-          title="Estado"
           :description="customer.status === 'ACTIVE' ? 'Cliente activo generando ingresos' : 'Estado del cliente en el pipeline'"
+          title="Estado"
         >
           <template #icon>
-            <UIcon 
-              :name="{
-                LEAD: 'i-lucide-user-plus',
-                PROSPECT: 'i-lucide-users',
-                ACTIVE: 'i-lucide-user-check',
-                INACTIVE: 'i-lucide-user-minus',
-                CHURNED: 'i-lucide-user-x'
-              }[customer.status]"
+            <UIcon
               :class="{
                 LEAD: 'text-blue-500',
                 PROSPECT: 'text-yellow-500',
@@ -151,30 +137,36 @@ definePageMeta({
                 INACTIVE: 'text-gray-500',
                 CHURNED: 'text-red-500'
               }[customer.status]"
+              :name="{
+                LEAD: 'i-lucide-user-plus',
+                PROSPECT: 'i-lucide-users',
+                ACTIVE: 'i-lucide-user-check',
+                INACTIVE: 'i-lucide-user-minus',
+                CHURNED: 'i-lucide-user-x'
+              }[customer.status]"
             />
           </template>
         </UPageCard>
 
         <UPageCard
-          title="Contactos"
           :description="`${customer.contacts?.length || 0} contacto(s) registrados`"
+          title="Contactos"
         >
           <template #icon>
-            <UIcon name="i-lucide-contact" class="text-purple-500" />
+            <UIcon class="text-purple-500" name="i-lucide-contact"/>
           </template>
         </UPageCard>
 
         <UPageCard
-          title="Industria"
           :description="customer.businessProfile?.category || 'No especificada'"
+          title="Industria"
         >
           <template #icon>
-            <UIcon name="i-lucide-building" class="text-indigo-500" />
+            <UIcon class="text-indigo-500" name="i-lucide-building"/>
           </template>
         </UPageCard>
 
         <UPageCard
-          title="Tamaño"
           :description="{
             MICRO: 'Micro (1-10 empleados)',
             SMALL: 'Pequeña (11-50 empleados)',
@@ -182,9 +174,10 @@ definePageMeta({
             LARGE: 'Grande (251-1000 empleados)',
             ENTERPRISE: 'Empresa (1000+ empleados)'
           }[customer.businessProfile?.size || ''] || 'No especificado'"
+          title="Tamaño"
         >
           <template #icon>
-            <UIcon name="i-lucide-users" class="text-orange-500" />
+            <UIcon class="text-orange-500" name="i-lucide-users"/>
           </template>
         </UPageCard>
       </div>
@@ -195,8 +188,8 @@ definePageMeta({
         <div class="lg:col-span-2 space-y-6">
           <!-- Business Details -->
           <UPageCard
-            title="Información de la Empresa"
             description="Detalles del negocio y datos fiscales"
+            title="Información de la Empresa"
           >
             <div class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -218,11 +211,11 @@ definePageMeta({
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Sitio Web</label>
                   <p class="text-gray-900">
-                    <a 
-                      v-if="customer.businessProfile?.website" 
-                      :href="customer.businessProfile.website" 
-                      target="_blank" 
+                    <a
+                      v-if="customer.businessProfile?.website"
+                      :href="customer.businessProfile.website"
                       class="text-blue-600 hover:underline"
+                      target="_blank"
                     >
                       {{ customer.businessProfile.website }}
                     </a>
@@ -240,8 +233,8 @@ definePageMeta({
                     {{ customer.businessProfile.addresses[0].street2 }}
                   </p>
                   <p class="text-gray-700">
-                    {{ customer.businessProfile.addresses[0].city }}, 
-                    {{ customer.businessProfile.addresses[0].state }} 
+                    {{ customer.businessProfile.addresses[0].city }},
+                    {{ customer.businessProfile.addresses[0].state }}
                     {{ customer.businessProfile.addresses[0].zipCode }}
                   </p>
                   <p class="text-gray-700">{{ customer.businessProfile.addresses[0].country }}</p>
@@ -258,12 +251,12 @@ definePageMeta({
         <div class="space-y-6">
           <!-- Contact Information -->
           <UPageCard
-            title="Contactos"
             description="Personas de contacto principales"
+            title="Contactos"
           >
             <div class="space-y-3">
-              <div 
-                v-for="contact in customer.contacts?.filter(c => c.isPrimary)" 
+              <div
+                v-for="contact in customer.contacts?.filter(c => c.isPrimary)"
                 :key="contact.id"
                 class="bg-gray-50 rounded-lg p-3"
               >
@@ -280,11 +273,11 @@ definePageMeta({
                 </div>
                 <div class="mt-2 space-y-1">
                   <p class="text-sm text-gray-700">
-                    <UIcon name="i-lucide-mail" class="inline w-4 h-4 mr-1" />
+                    <UIcon class="inline w-4 h-4 mr-1" name="i-lucide-mail"/>
                     {{ contact.user?.email }}
                   </p>
                   <p v-if="customer.businessProfile?.phone" class="text-sm text-gray-700">
-                    <UIcon name="i-lucide-phone" class="inline w-4 h-4 mr-1" />
+                    <UIcon class="inline w-4 h-4 mr-1" name="i-lucide-phone"/>
                     {{ customer.businessProfile.phone }}
                   </p>
                 </div>
@@ -299,11 +292,11 @@ definePageMeta({
           <!-- Customer Source -->
           <UPageCard
             v-if="customer.source"
-            title="Fuente de Adquisición"
             :description="`Cliente adquirido vía ${customer.source}`"
+            title="Fuente de Adquisición"
           >
             <div class="flex items-center gap-2">
-              <UIcon 
+              <UIcon
                 :name="{
                   website: 'i-lucide-globe',
                   cold_visit: 'i-lucide-map-pin',
@@ -318,7 +311,7 @@ definePageMeta({
                   partner: 'i-lucide-handshake',
                   other: 'i-lucide-help-circle'
                 }[customer.source] || 'i-lucide-help-circle'"
-                class="text-blue-500" 
+                class="text-blue-500"
               />
               <span class="capitalize">{{ customer.source.replace('_', ' ') }}</span>
             </div>

@@ -138,14 +138,14 @@ const updateStatus = () => {
   <!-- Modal -->
   <UModal
     v-model:open="isOpen"
-    :description="`Change project status from ${currentStatus} to ${selectedStatus}`"
-    :title="`Update Project Status`"
+    :description="$t('projects.status_modal.description', { currentStatus: getStatusLabel(currentStatus), selectedStatus: getStatusLabel(selectedStatus) })"
+    :title="$t('projects.status_modal.title')"
   >
     <template #body>
       <div class="flex flex-col space-y-4">
         <!-- Status Selection -->
         <UFormField
-          label="New Status"
+          :label="$t('projects.status_modal.label_new_status')"
           name="status"
           required
         >
@@ -153,26 +153,26 @@ const updateStatus = () => {
             v-model="selectedStatus"
             :items="statusOptions"
             class="w-full"
-            placeholder="Select new status"
+            :placeholder="$t('projects.status_modal.placeholder_status')"
           />
         </UFormField>
 
         <!-- Reason (optional for most, required for certain transitions) -->
         <UFormField
-          :label="reasonRequired ? 'Reason (Required)' : 'Reason (Optional)'"
+          :label="reasonRequired ? $t('projects.status_modal.label_reason_required') : $t('projects.status_modal.label_reason_optional')"
           :required="reasonRequired"
           name="reason"
         >
           <UTextarea
             v-model="reason"
-            :placeholder="reasonRequired ? 'Please provide a reason for this status change' : 'Optional: Provide context for this change'"
+            :placeholder="reasonRequired ? $t('projects.status_modal.placeholder_reason_required') : $t('projects.status_modal.placeholder_reason_optional')"
             rows="3"
           />
         </UFormField>
 
         <!-- Status Preview -->
         <div class="p-4 bg-gray-50 rounded-lg">
-          <h4 class="text-sm font-medium mb-2">Status Change Preview:</h4>
+          <h4 class="text-sm font-medium mb-2">{{ $t('projects.status_modal.preview.title') }}</h4>
           <div class="flex items-center space-x-2">
             <UBadge :color="getStatusColor(currentStatus)" :variant="'solid'">
               {{ getStatusLabel(currentStatus) }}
@@ -196,14 +196,14 @@ const updateStatus = () => {
           variant="subtle"
           @click="cancel"
         >
-          Cancel
+          {{ $t('common.actions.button_cancel') }}
         </UButton>
         <UButton
           :disabled="!selectedStatus || (reasonRequired && !reason.trim())"
           :loading="updateStatusMutation.isPending.value"
           @click="updateStatus"
         >
-          Update Status
+          {{ $t('projects.status_modal.button_update') }}
         </UButton>
       </div>
     </template>

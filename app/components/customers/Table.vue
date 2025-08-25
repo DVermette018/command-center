@@ -51,20 +51,21 @@ const onStatusChanged = (updatedCustomer: CustomerDTO) => {
   refetch()
 }
 
+const { t } = useI18n()
+
 const getRowItems = (row: Row<CustomerDTO>) => {
   return [
     {
       type: 'label',
-      label: 'Actions'
+      label: t('customers.table.actions.label_actions')
     },
     {
-      label: 'Copy customer ID',
+      label: t('customers.table.actions.copy_id'),
       icon: 'i-lucide-copy',
       onSelect: () => {
         navigator.clipboard.writeText(row.original.id.toString())
         toast.add({
-          title: 'Copied to clipboard',
-          description: `Customer ID ${row.original.id} copied to clipboard`
+          title: t('customers.table.messages.copied_id', { id: row.original.id })
         })
       }
     },
@@ -72,34 +73,33 @@ const getRowItems = (row: Row<CustomerDTO>) => {
       type: 'separator'
     },
     {
-      label: 'View customer details',
+      label: t('customers.table.actions.view_details'),
       icon: 'i-lucide-list',
       onSelect: () => {
         navigateTo(`/customers/${row.original.id}`)
       }
     },
     {
-      label: 'Change status',
+      label: t('customers.table.actions.change_status'),
       icon: 'i-lucide-refresh-cw',
       onSelect: () => {
         openStatusModal(row.original)
       }
     },
     {
-      label: 'View customer payments',
+      label: t('customers.table.actions.view_payments'),
       icon: 'i-lucide-wallet'
     },
     {
       type: 'separator'
     },
     {
-      label: 'Delete customer',
+      label: t('customers.table.actions.delete_customer'),
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect: () => {
         toast.add({
-          title: 'Customer deleted',
-          description: 'The customer has been deleted.'
+          title: t('customers.table.messages.deleted')
         })
       }
     }
@@ -127,7 +127,7 @@ const columns: TableColumn<CustomerDTO>[] = [
   },
   {
     accessorKey: 'name',
-    header: 'Name',
+    header: () => t('customers.table.header_name'),
     cell: ({ row }) => {
       return h('div', undefined, [
         h('p', { class: 'font-medium text-highlighted' }, row.original.businessProfile?.businessName),
@@ -137,7 +137,7 @@ const columns: TableColumn<CustomerDTO>[] = [
   },
   {
     accessorKey: 'representative',
-    header: 'Representative',
+    header: () => t('customers.table.header_representative'),
     cell: ({ row }) => {
       const primaryContact = row.original.contacts?.find(contact => contact.isPrimary)
       return h('div', undefined, [
@@ -148,7 +148,7 @@ const columns: TableColumn<CustomerDTO>[] = [
   },
   {
     accessorKey: 'industry',
-    header: 'Industry',
+    header: () => t('customers.table.header_industry'),
     cell: ({ row }) => {
       return h('div', undefined, [
         h('p', { class: 'font-medium text-highlighted' }, row.original.businessProfile?.category || 'N/A'),
@@ -158,7 +158,7 @@ const columns: TableColumn<CustomerDTO>[] = [
   },
   {
     accessorKey: 'status',
-    header: 'Status',
+    header: () => t('customers.table.header_status'),
     filterFn: 'equals',
     cell: ({ row }) => {
       const color = {
@@ -244,8 +244,8 @@ watchEffect(() => {
   if (status.value === 'error') {
     console.error('Failed to fetch customers:', error.value)
     toast.add({
-      title: 'Error',
-      description: 'Failed to fetch customers',
+      title: t('common.general.error'),
+      description: t('customers.table.messages.error_fetch'),
       color: 'error',
       icon: 'i-lucide-x'
     })
@@ -263,7 +263,7 @@ const handlePageChange = (page: number) => {
       v-model="nameFilter"
       class="max-w-sm"
       icon="i-lucide-search"
-      placeholder="Filter name..."
+      :placeholder="$t('customers.table.placeholder_search')"
     />
 
     <div class="flex flex-wrap items-center gap-1.5">
@@ -272,7 +272,7 @@ const handlePageChange = (page: number) => {
           v-if="selectedRowsCount > 0"
           color="error"
           icon="i-lucide-trash"
-          label="Delete"
+          :label="$t('customers.table.button_delete')"
           variant="subtle"
         >
           <template #trailing>
@@ -286,16 +286,16 @@ const handlePageChange = (page: number) => {
       <USelect
         v-model="statusFilter"
         :items="[
-          { label: 'All', value: 'all' },
-          { label: 'Lead', value: 'LEAD' },
-          { label: 'Prospect', value: 'PROSPECT' },
-          { label: 'Active', value: 'ACTIVE' },
-          { label: 'Inactive', value: 'INACTIVE' },
-          { label: 'Churned', value: 'CHURNED' }
+          { label: t('common.general.all'), value: 'all' },
+          { label: t('customers.statuses.lead'), value: 'LEAD' },
+          { label: t('customers.statuses.prospect'), value: 'PROSPECT' },
+          { label: t('customers.statuses.active'), value: 'ACTIVE' },
+          { label: t('customers.statuses.inactive'), value: 'INACTIVE' },
+          { label: t('customers.statuses.churned'), value: 'CHURNED' }
         ]"
         :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
         class="min-w-28"
-        placeholder="Filter status"
+        :placeholder="$t('customers.table.placeholder_status_filter')"
       />
 
       <UDropdownMenu
@@ -319,7 +319,7 @@ const handlePageChange = (page: number) => {
       >
         <UButton
           color="neutral"
-          label="Display"
+          :label="$t('customers.table.button_display')"
           trailing-icon="i-lucide-settings-2"
           variant="outline"
         />
@@ -351,8 +351,7 @@ const handlePageChange = (page: number) => {
 
   <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
     <div class="text-sm text-muted">
-      {{ selectedRowsCount }} of
-      {{ filteredRowsCount }} row(s) selected.
+      {{ $t('customers.table.selection_summary', { selected: selectedRowsCount, total: filteredRowsCount }) }}
     </div>
 
     <div class="flex items-center gap-1.5">

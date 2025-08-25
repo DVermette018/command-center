@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "title": "Nuxt Dashboard Template",
+    "description": "A modern dashboard template built with Nuxt"
+  },
+  "navigation": {
+    "tooltip_notifications": "Notifications",
+    "go_to": "Go to",
+    "code": "Code",
+    "view_source": "View page source"
+  },
+  "cookies": {
+    "title": "We use first-party cookies to enhance your experience on our website.",
+    "button_accept": "Accept",
+    "button_opt_out": "Opt out"
+  },
+  "inbox": {
+    "title": "Inbox",
+    "filters": {
+      "all": "All",
+      "unread": "Unread"
+    },
+    "actions": {
+      "archive": "Archive",
+      "attach_file": "Attach file",
+      "save_draft": "Save draft"
+    }
+  },
+  "error": {
+    "page_not_found": "Page not found"
+  }
+}

@@ -215,7 +215,7 @@ watch(open, (newValue) => {
   <div>
     <UButton
       icon="i-lucide-plus"
-      label="Nuevo Proyecto"
+      :label="$t('projects.add_modal.button_trigger')"
       @click="open = true"
     />
 
@@ -226,8 +226,8 @@ watch(open, (newValue) => {
       <template #header>
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-lg font-semibold">Nuevo Proyecto</h3>
-            <p class="text-sm text-gray-500">Configure los detalles del proyecto</p>
+            <h3 class="text-lg font-semibold">{{ $t('projects.add_modal.title') }}</h3>
+            <p class="text-sm text-gray-500">{{ $t('projects.add_modal.subtitle') }}</p>
           </div>
         </div>
       </template>
@@ -243,21 +243,21 @@ watch(open, (newValue) => {
           <!-- Basic Information -->
           <UPageCard
             class="mb-6"
-            description="Información básica del proyecto"
-            title="Información General"
+            :description="$t('projects.add_modal.sections.basic_info.description')"
+            :title="$t('projects.add_modal.sections.basic_info.title')"
             variant="subtle"
           >
             <UFormField
               class="flex max-sm:flex-col justify-between items-start gap-4"
-              description="Nombre descriptivo del proyecto"
-              label="Nombre del Proyecto"
+              :description="$t('projects.add_modal.sections.basic_info.description_name')"
+              :label="$t('projects.add_modal.sections.basic_info.label_name')"
               name="name"
               required
             >
               <UInput
                 v-model="state.name"
                 class="w-full max-w-sm"
-                placeholder="Ej: Rediseño de sitio web"
+                :placeholder="$t('projects.add_modal.sections.basic_info.placeholder_name')"
               />
             </UFormField>
 
@@ -265,8 +265,8 @@ watch(open, (newValue) => {
 
             <UFormField
               class="flex max-sm:flex-col justify-between items-start gap-4"
-              description="Tipo de proyecto"
-              label="Tipo"
+              :description="$t('projects.add_modal.sections.basic_info.description')"
+              :label="$t('projects.add_modal.sections.basic_info.label_type')"
               name="type"
               required
             >
@@ -274,7 +274,7 @@ watch(open, (newValue) => {
                 v-model="state.type"
                 :items="projectTypeOptions"
                 class="w-48 max-w-sm"
-                placeholder="Seleccione el tipo"
+                :placeholder="$t('projects.add_modal.sections.basic_info.placeholder_type')"
               />
             </UFormField>
 
@@ -283,14 +283,14 @@ watch(open, (newValue) => {
           <!-- Dates and Timeline -->
           <UPageCard
             class="mb-6"
-            description="Fechas importantes del proyecto"
-            title="Cronograma"
+            :description="$t('projects.add_modal.sections.timeline.description')"
+            :title="$t('projects.add_modal.sections.timeline.title')"
             variant="subtle"
           >
             <UFormField
               class="flex max-sm:flex-col justify-between items-start gap-4"
-              description="Fecha de inicio del proyecto"
-              label="Fecha de Inicio"
+              :description="$t('projects.add_modal.sections.timeline.description_start_date')"
+              :label="$t('projects.add_modal.sections.timeline.label_start_date')"
               name="startDate"
             >
 
@@ -303,7 +303,7 @@ watch(open, (newValue) => {
               :error="!validateDates ? 'La fecha objetivo debe ser posterior a la fecha de inicio' : undefined"
               class="flex max-sm:flex-col justify-between items-start gap-4"
               description="Fecha objetivo de finalización"
-              label="Fecha Objetivo"
+              :label="$t('projects.add_modal.sections.timeline.label_target_date')"
               name="targetEndDate"
             >
               <DatePicker v-model="targetEndDateCalendar" class="w-full max-w-sm" />
@@ -320,15 +320,15 @@ watch(open, (newValue) => {
           >
             <UFormField
               class="flex max-sm:flex-col justify-between items-start gap-4"
-              description="Gerente responsable del proyecto"
-              label="Gerente de Proyecto"
+              :description="$t('projects.add_modal.sections.team.description_manager')"
+              :label="$t('projects.add_modal.sections.team.label_manager')"
               name="projectManagerId"
             >
               <USelect
                 v-model="state.projectManagerId"
                 :items="projectManagers"
                 class="w-full max-w-sm"
-                placeholder="Seleccione un gerente"
+                :placeholder="$t('projects.add_modal.sections.team.placeholder_manager')"
               />
             </UFormField>
 
@@ -340,7 +340,7 @@ watch(open, (newValue) => {
         <div class="flex justify-end gap-3">
           <UButton
             color="neutral"
-            label="Cancelar"
+            :label="$t('common.actions.button_cancel')"
             variant="subtle"
             @click="open = false"
           />
@@ -348,7 +348,7 @@ watch(open, (newValue) => {
             color="primary"
             form="project-form"
             icon="i-lucide-save"
-            label="Crear Proyecto"
+            :label="$t('projects.add_modal.button_create')"
             type="submit"
             variant="solid"
           />
