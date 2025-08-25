@@ -90,7 +90,7 @@ export const useSelectorFromZod = <T extends z.ZodTypeAny>(
 
   const selector = buildSelector(schema)
 
-  return {
+  const result = {
     selector,
 
     /**
@@ -98,7 +98,7 @@ export const useSelectorFromZod = <T extends z.ZodTypeAny>(
      */
     withRelation: (name: string, config: any) => {
       selector[name] = config
-      return { selector, withRelation }
+      return result
     },
 
     /**
@@ -110,9 +110,11 @@ export const useSelectorFromZod = <T extends z.ZodTypeAny>(
       } else {
         selector[name] = { select: true, where }
       }
-      return { selector, withRelation, whereRelation }
+      return result
     }
   }
+
+  return result
 }
 
 // ============================================

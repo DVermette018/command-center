@@ -1,4 +1,23 @@
+// Import types from the main types directory
+export type { Period, Range } from '~~/types/common'
+export type { UserRole } from '~~/types/user'
+// We re-export User from main types but also create UI-specific User interface for components
+export type { User as ApiUser } from '~~/types/user'
+
 export type SaleStatus = 'paid' | 'failed' | 'refunded'
+
+export interface Avatar {
+  src: string
+  alt: string
+}
+
+// UI-specific User interface for components that need avatar and display name
+export interface User {
+  id: number
+  name: string
+  email: string
+  avatar: Avatar
+}
 
 export interface Mail {
   id: number

@@ -74,7 +74,7 @@ export const defineMutation = <
   onSuccess?: (result: TResponse, payload: TPayload) => void
 }): UseMutationReturnType<TResponse, TError, TPayload, void> => {
   const queryClient = useQueryClient()
-  return useMutation({
+  return useMutation<TResponse, TError, TPayload, void>({
     mutationFn,
     onSuccess: (result: any, payload: any) => {
       const key = Array.isArray(cacheKey) ? cacheKey : [cacheKey]

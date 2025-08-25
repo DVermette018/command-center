@@ -28,13 +28,51 @@ export const createProjectSchema = z.object({
   projectManagerId: z.string()
 })
 
-// export const updateProjectSchema = createProjectSchema.partial().extend({
-//   id: z.string().min(1, 'Project ID is required')
-// })
+export const updateProjectSchema = z.object({
+  id: z.string().min(1, 'Project ID is required'),
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  type: projectTypeEnum.optional(),
+  status: projectStatusEnum.optional(),
+  phase: projectPhaseEnum.optional(),
+  priority: priorityEnum.optional(),
+  startDate: z.coerce.date().optional(),
+  targetEndDate: z.coerce.date().optional(),
+  actualEndDate: z.coerce.date().optional(),
+  projectManagerId: z.string().optional(),
+  budget: z.number().optional(),
+  currency: z.string().optional()
+})
+
+// Team member schemas
+export const createProjectTeamMemberSchema = z.object({
+  projectId: z.string().min(1, 'Project ID is required'),
+  userId: z.string().min(1, 'User ID is required'),
+  role: z.string().min(1, 'Role is required')
+})
+
+export const projectTeamMemberDTOSchema = z.object({
+  id: z.string(),
+  projectId: z.string(),
+  userId: z.string(),
+  role: z.string(),
+  user: z.object({
+    id: z.string(),
+    email: z.string(),
+    firstName: z.string(),
+    lastName: z.string(),
+    role: z.string(),
+    isActive: z.boolean()
+  }),
+  joinedAt: z.string().datetime(),
+  leftAt: z.string().datetime().optional()
+})
 
 // Type exports
 export type CreateProjectDTO = z.output<typeof createProjectSchema>
-// export type UpdateProjectSchema = z.output<typeof updateProjectSchema>
+export type UpdateProjectDTO = z.output<typeof updateProjectSchema>
+export type CreateProjectTeamMemberDTO = z.output<typeof createProjectTeamMemberSchema>
+export type ProjectTeamMemberDTO = z.infer<typeof projectTeamMemberDTOSchema>
 // export type ProjectType = z.infer<typeof projectTypeEnum>
 // export type ProjectStatus = z.infer<typeof projectStatusEnum>
 // export type ProjectPhase = z.infer<typeof projectPhaseEnum>

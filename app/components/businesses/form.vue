@@ -11,8 +11,6 @@ const projectId = computed(() => route.params.projectId || route.query.projectId
 
 // Form state matching the new schema
 const businessForm = reactive<CreateBusinessProfileDTO>({
-  projectId: projectId.value as string || '',
-
   // Identity
   businessName: '',
   ownerName: '',
@@ -24,20 +22,10 @@ const businessForm = reactive<CreateBusinessProfileDTO>({
   // Business Details
   category: '',
   customCategory: '',
-  description: '',
-  productsServices: '',
   yearEstablished: undefined,
 
-  // Branding
-  slogan: '',
-  missionStatement: '',
-  primaryColor: '',
-  secondaryColor: '',
-  accentColors: '',
-  additionalColors: [],
-
-  // Relations (will be handled separately)
-  addresses: [{
+  // Single address (not array)
+  address: {
     type: 'BUSINESS',
     isPrimary: true,
     street: '',
@@ -47,20 +35,26 @@ const businessForm = reactive<CreateBusinessProfileDTO>({
     zipCode: '',
     country: 'MX',
     reference: ''
-  }],
-  schedules: [],
-  socialMedia: []
+  },
+
+  // Branding
+  slogan: '',
+  missionStatement: '',
+  primaryColor: '',
+  secondaryColor: '',
+  accentColor: '',
+  additionalColors: ''
 })
 
 // Initialize schedules with all days
 const schedules = reactive([
-  { dayOfWeek: 'MONDAY', openTime: '09:00', closeTime: '18:00', isClosed: false },
-  { dayOfWeek: 'TUESDAY', openTime: '09:00', closeTime: '18:00', isClosed: false },
-  { dayOfWeek: 'WEDNESDAY', openTime: '09:00', closeTime: '18:00', isClosed: false },
-  { dayOfWeek: 'THURSDAY', openTime: '09:00', closeTime: '18:00', isClosed: false },
-  { dayOfWeek: 'FRIDAY', openTime: '09:00', closeTime: '18:00', isClosed: false },
-  { dayOfWeek: 'SATURDAY', openTime: '10:00', closeTime: '14:00', isClosed: false },
-  { dayOfWeek: 'SUNDAY', openTime: '', closeTime: '', isClosed: true }
+  { dayOfWeek: 'MONDAY', openTime: '09:00', closeTime: '18:00', isClosed: false, breakStart: '', breakEnd: '' },
+  { dayOfWeek: 'TUESDAY', openTime: '09:00', closeTime: '18:00', isClosed: false, breakStart: '', breakEnd: '' },
+  { dayOfWeek: 'WEDNESDAY', openTime: '09:00', closeTime: '18:00', isClosed: false, breakStart: '', breakEnd: '' },
+  { dayOfWeek: 'THURSDAY', openTime: '09:00', closeTime: '18:00', isClosed: false, breakStart: '', breakEnd: '' },
+  { dayOfWeek: 'FRIDAY', openTime: '09:00', closeTime: '18:00', isClosed: false, breakStart: '', breakEnd: '' },
+  { dayOfWeek: 'SATURDAY', openTime: '10:00', closeTime: '14:00', isClosed: false, breakStart: '', breakEnd: '' },
+  { dayOfWeek: 'SUNDAY', openTime: '', closeTime: '', isClosed: true, breakStart: '', breakEnd: '' }
 ])
 
 // Social media array
@@ -68,7 +62,7 @@ const socialMedia = reactive([
   { platform: 'FACEBOOK', url: '', username: '', isActive: true }
 ])
 
-// Additional colors array for multiple accent colors
+// Additional colors for UI (will be stored as string)
 const additionalColorsList = reactive<string[]>([])
 
 // Options
@@ -95,7 +89,7 @@ const socialPlatformOptions = [
   { label: 'WhatsApp Business', value: 'WHATSAPP' }
 ]
 
-const dayLabels = {
+const dayLabels: Record<string, string> = {
   MONDAY: 'Lunes',
   TUESDAY: 'Martes',
   WEDNESDAY: 'Miércoles',
@@ -146,24 +140,14 @@ const onSubmit = async (event: FormSubmitEvent<CreateBusinessProfileDTO>): Promi
     // Prepare the payload
     const payload = {
       ...event.data,
-      // Convert reactive arrays to the form data
-      schedules: schedules.filter(s => !s.isClosed || s.openTime), // Include only configured days
-      socialMedia: socialMedia.filter(s => s.url || s.username), // Include only filled social media
-      additionalColors: additionalColorsList.length > 0 ? additionalColorsList : undefined,
-      // Ensure address is properly formatted
-      addresses: [{
-        ...event.data.addresses[0],
-        coordinates: event.data.addresses[0].coordinates ? {
-          lat: event.data.addresses[0].coordinates.lat,
-          lng: event.data.addresses[0].coordinates.lng
-        } : undefined
-      }]
+      // Convert additional colors array to string for storage
+      additionalColors: additionalColorsList.length > 0 ? JSON.stringify(additionalColorsList) : undefined
     }
 
     console.log('Submitting business profile:', payload)
 
     // Call your API endpoint
-    await api.business.store(payload)
+    await api.business.create().mutateAsync(payload)
 
     toast.add({
       title: 'Registro exitoso',
@@ -375,33 +359,7 @@ onMounted(() => {
 
           <USeparator/>
 
-          <UFormField
-            class="flex max-sm:flex-col justify-between items-start gap-4"
-            description="Breve descripción del negocio"
-            label="Descripción"
-            name="description"
-          >
-            <UTextarea
-              v-model="businessForm.description"
-              :rows="3"
-              placeholder="Describa su negocio..."
-            />
-          </UFormField>
-
-          <USeparator/>
-
-          <UFormField
-            class="flex max-sm:flex-col justify-between items-start gap-4"
-            description="Productos o servicios principales que ofrece"
-            label="Productos/Servicios"
-            name="productsServices"
-          >
-            <UTextarea
-              v-model="businessForm.productsServices"
-              :rows="3"
-              placeholder="Liste sus productos o servicios principales..."
-            />
-          </UFormField>
+<!-- Note: description and productsServices are not part of the CreateBusinessProfileDTO schema -->
         </UPageCard>
 
         <!-- Branding -->
@@ -555,11 +513,11 @@ onMounted(() => {
             class="flex max-sm:flex-col justify-between items-start gap-4"
             description="Calle y número"
             label="Dirección"
-            name="addresses[0].street"
+            name="address.street"
             required
           >
             <UInput
-              v-model="businessForm.addresses[0].street"
+              v-model="businessForm.address.street"
               placeholder="Av. Principal 123"
             />
           </UFormField>
@@ -570,10 +528,10 @@ onMounted(() => {
             class="flex max-sm:flex-col justify-between items-start gap-4"
             description="Colonia, edificio, piso, etc."
             label="Dirección Línea 2"
-            name="addresses[0].street2"
+            name="address.street2"
           >
             <UInput
-              v-model="businessForm.addresses[0].street2"
+              v-model="businessForm.address.street2"
               placeholder="Col. Centro, Piso 2"
             />
           </UFormField>
@@ -584,11 +542,11 @@ onMounted(() => {
             class="flex max-sm:flex-col justify-between items-start gap-4"
             description="Ciudad"
             label="Ciudad"
-            name="addresses[0].city"
+            name="address.city"
             required
           >
             <UInput
-              v-model="businessForm.addresses[0].city"
+              v-model="businessForm.address.city"
               placeholder="Guadalajara"
             />
           </UFormField>
@@ -599,11 +557,11 @@ onMounted(() => {
             class="flex max-sm:flex-col justify-between items-start gap-4"
             description="Estado o provincia"
             label="Estado"
-            name="addresses[0].state"
+            name="address.state"
             required
           >
             <UInput
-              v-model="businessForm.addresses[0].state"
+              v-model="businessForm.address.state"
               placeholder="Jalisco"
             />
           </UFormField>
@@ -614,11 +572,11 @@ onMounted(() => {
             class="flex max-sm:flex-col justify-between items-start gap-4"
             description="Código postal"
             label="CP"
-            name="addresses[0].zipCode"
+            name="address.zipCode"
             required
           >
             <UInput
-              v-model="businessForm.addresses[0].zipCode"
+              v-model="businessForm.address.zipCode"
               placeholder="44100"
             />
           </UFormField>
@@ -629,10 +587,10 @@ onMounted(() => {
             class="flex max-sm:flex-col justify-between items-start gap-4"
             description="Referencias o indicaciones adicionales"
             label="Referencias"
-            name="addresses[0].reference"
+            name="address.reference"
           >
             <UInput
-              v-model="businessForm.addresses[0].reference"
+              v-model="businessForm.address.reference"
               placeholder="Frente al parque central"
             />
           </UFormField>

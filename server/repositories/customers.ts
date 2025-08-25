@@ -131,11 +131,11 @@ export const register = (db: PrismaClient) => ({
             ...contact,
             position: contact.position ?? undefined,
             department: contact.department ?? undefined,
-            user: {
+            user: contact.user ? {
               ...contact.user,
               createdAt: contact.user.createdAt.toISOString(),
               updatedAt: contact.user.updatedAt.toISOString()
-            }
+            } : undefined
           })),
           businessProfile: c.businessProfile ? {
             businessName: c.businessProfile.businessName,
@@ -207,7 +207,7 @@ export const register = (db: PrismaClient) => ({
             ...contact.user,
             createdAt: contact.user.createdAt.toISOString(),
             updatedAt: contact.user.updatedAt.toISOString()
-          } : null
+          } : undefined
         })),
         businessProfile: c.businessProfile ? {
           businessName: c.businessProfile.businessName,
@@ -379,38 +379,289 @@ export const register = (db: PrismaClient) => ({
       console.error('Error creating customer:', error)
       throw error
     }
-  }
+  },
 
-  // update: async (id: string, customerData: Partial<Customer>) => {
-  //   try {
-  //     return await db.customer.update({
-  //       where: { id },
-  //       data: {
-  //         ...customerData,
-  //         updatedAt: new Date()
-  //       },
-  //       select: {
-  //         id: true,
-  //         name: true,
-  //         updatedAt: true
-  //       }
-  //     })
-  //   } catch (error) {
-  //     console.error(`Error updating customer with ID ${id}:`, error)
-  //     throw error
-  //   }
-  // },
-  //
-  // delete: async (id: string) => {
-  //   try {
-  //     const deletedCustomer = await db.customer.delete({
-  //       where: { id }
-  //     })
-  //     console.log(`Deleted customer with ID ${id}:`, deletedCustomer)
-  //     return deletedCustomer
-  //   } catch (error) {
-  //     console.error(`Error deleting customer with ID ${id}:`, error)
-  //     throw error
-  //   }
-  // }
+  update: async (id: string, customerData: Partial<CreateCustomerSchema>): Promise<CustomerDTO> => {
+    try {
+      const updateData: any = {
+        updatedAt: new Date()
+      }
+
+      if (customerData.status) {
+        updateData.status = customerData.status
+      }
+      if (customerData.source) {
+        updateData.source = customerData.source
+      }
+
+      const c = await db.customer.update({
+        where: { id },
+        data: updateData,
+        select: CUSTOMER_SELECTOR
+      })
+
+      return {
+        ...c,
+        createdAt: c.createdAt.toISOString(),
+        updatedAt: c.updatedAt.toISOString(),
+        contacts: c.contacts?.map((contact) => ({
+          ...contact,
+          position: contact.position ?? undefined,
+          department: contact.department ?? undefined,
+          user: contact.user ? {
+            ...contact.user,
+            createdAt: contact.user.createdAt.toISOString(),
+            updatedAt: contact.user.updatedAt.toISOString()
+          } : undefined
+        })),
+        businessProfile: c.businessProfile ? {
+          businessName: c.businessProfile.businessName,
+          legalName: c.businessProfile.legalName || undefined,
+          ownerName: c.businessProfile.ownerName || undefined,
+          taxId: c.businessProfile.taxId || undefined,
+          phone: c.businessProfile.phone || undefined,
+          email: c.businessProfile.email || undefined,
+          website: c.businessProfile.website || undefined,
+          category: c.businessProfile.category,
+          size: c.businessProfile.size || undefined,
+          customCategory: c.businessProfile.customCategory || undefined,
+          yearEstablished: c.businessProfile.yearEstablished || undefined,
+          description: c.businessProfile.description || undefined,
+          productsServices: c.businessProfile.productsServices || undefined,
+          slogan: c.businessProfile.slogan || undefined,
+          missionStatement: c.businessProfile.missionStatement || undefined,
+          primaryColor: c.businessProfile.primaryColor || undefined,
+          secondaryColor: c.businessProfile.secondaryColor || undefined,
+          accentColor: c.businessProfile.accentColor || undefined,
+          additionalColors: c.businessProfile.additionalColors || undefined,
+          addresses: (c.businessProfile.addresses || []).map((address) => ({
+            type: address.type,
+            street: address.street,
+            street2: address.street2 || undefined,
+            city: address.city,
+            state: address.state,
+            zipCode: address.zipCode,
+            country: address.country,
+            reference: address.reference || undefined,
+            isPrimary: address.isPrimary || false
+          }))
+        } : undefined
+      } satisfies CustomerDTO
+    } catch (error) {
+      console.error(`Error updating customer with ID ${id}:`, error)
+      throw error
+    }
+  },
+
+  updateStatus: async (id: string, status: CustomerStatus, reason?: string): Promise<CustomerDTO> => {
+    try {
+      const c = await db.customer.update({
+        where: { id },
+        data: {
+          status,
+          updatedAt: new Date()
+        },
+        select: CUSTOMER_SELECTOR
+      })
+
+      return {
+        ...c,
+        createdAt: c.createdAt.toISOString(),
+        updatedAt: c.updatedAt.toISOString(),
+        contacts: c.contacts?.map((contact) => ({
+          ...contact,
+          position: contact.position ?? undefined,
+          department: contact.department ?? undefined,
+          user: contact.user ? {
+            ...contact.user,
+            createdAt: contact.user.createdAt.toISOString(),
+            updatedAt: contact.user.updatedAt.toISOString()
+          } : undefined
+        })),
+        businessProfile: c.businessProfile ? {
+          businessName: c.businessProfile.businessName,
+          legalName: c.businessProfile.legalName || undefined,
+          ownerName: c.businessProfile.ownerName || undefined,
+          taxId: c.businessProfile.taxId || undefined,
+          phone: c.businessProfile.phone || undefined,
+          email: c.businessProfile.email || undefined,
+          website: c.businessProfile.website || undefined,
+          category: c.businessProfile.category,
+          size: c.businessProfile.size || undefined,
+          customCategory: c.businessProfile.customCategory || undefined,
+          yearEstablished: c.businessProfile.yearEstablished || undefined,
+          description: c.businessProfile.description || undefined,
+          productsServices: c.businessProfile.productsServices || undefined,
+          slogan: c.businessProfile.slogan || undefined,
+          missionStatement: c.businessProfile.missionStatement || undefined,
+          primaryColor: c.businessProfile.primaryColor || undefined,
+          secondaryColor: c.businessProfile.secondaryColor || undefined,
+          accentColor: c.businessProfile.accentColor || undefined,
+          additionalColors: c.businessProfile.additionalColors || undefined,
+          addresses: (c.businessProfile.addresses || []).map((address) => ({
+            type: address.type,
+            street: address.street,
+            street2: address.street2 || undefined,
+            city: address.city,
+            state: address.state,
+            zipCode: address.zipCode,
+            country: address.country,
+            reference: address.reference || undefined,
+            isPrimary: address.isPrimary || false
+          }))
+        } : undefined
+      } satisfies CustomerDTO
+    } catch (error) {
+      console.error(`Error updating customer status with ID ${id}:`, error)
+      throw error
+    }
+  },
+
+  delete: async (id: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      await db.customer.delete({
+        where: { id }
+      })
+      
+      console.log(`Deleted customer with ID ${id}`)
+      return {
+        success: true,
+        message: `Customer with ID ${id} deleted successfully`
+      }
+    } catch (error) {
+      console.error(`Error deleting customer with ID ${id}:`, error)
+      throw error
+    }
+  },
+
+  search: async (query: string, pagination: Pagination): Promise<PaginatedResponse<CustomerDTO>> => {
+    try {
+      const whereClause = {
+        OR: [
+          {
+            businessProfile: {
+              businessName: {
+                contains: query,
+                mode: 'insensitive' as const
+              }
+            }
+          },
+          {
+            businessProfile: {
+              ownerName: {
+                contains: query,
+                mode: 'insensitive' as const
+              }
+            }
+          },
+          {
+            businessProfile: {
+              email: {
+                contains: query,
+                mode: 'insensitive' as const
+              }
+            }
+          },
+          {
+            contacts: {
+              some: {
+                user: {
+                  OR: [
+                    {
+                      firstName: {
+                        contains: query,
+                        mode: 'insensitive' as const
+                      }
+                    },
+                    {
+                      lastName: {
+                        contains: query,
+                        mode: 'insensitive' as const
+                      }
+                    },
+                    {
+                      email: {
+                        contains: query,
+                        mode: 'insensitive' as const
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+
+      const [customers, customerCount] = await db.$transaction([
+        db.customer.findMany({
+          where: whereClause,
+          skip: (pagination.pageIndex - 1) * pagination.pageSize,
+          take: pagination.pageSize,
+          select: CUSTOMER_SELECTOR,
+          orderBy: {
+            createdAt: 'desc'
+          }
+        }),
+        db.customer.count({ where: whereClause })
+      ])
+
+      return {
+        data: customers.map((c) => ({
+          ...c,
+          createdAt: c.createdAt.toISOString(),
+          updatedAt: c.updatedAt.toISOString(),
+          contacts: (c.contacts || []).map((contact) => ({
+            ...contact,
+            position: contact.position ?? undefined,
+            department: contact.department ?? undefined,
+            user: contact.user ? {
+              ...contact.user,
+              createdAt: contact.user.createdAt.toISOString(),
+              updatedAt: contact.user.updatedAt.toISOString()
+            } : undefined
+          })),
+          businessProfile: c.businessProfile ? {
+            businessName: c.businessProfile.businessName,
+            legalName: c.businessProfile.legalName || undefined,
+            ownerName: c.businessProfile.ownerName || undefined,
+            taxId: c.businessProfile.taxId || undefined,
+            phone: c.businessProfile.phone || undefined,
+            email: c.businessProfile.email || undefined,
+            website: c.businessProfile.website || undefined,
+            category: c.businessProfile.category,
+            size: c.businessProfile.size || undefined,
+            customCategory: c.businessProfile.customCategory || undefined,
+            yearEstablished: c.businessProfile.yearEstablished || undefined,
+            description: c.businessProfile.description || undefined,
+            productsServices: c.businessProfile.productsServices || undefined,
+            slogan: c.businessProfile.slogan || undefined,
+            missionStatement: c.businessProfile.missionStatement || undefined,
+            primaryColor: c.businessProfile.primaryColor || undefined,
+            secondaryColor: c.businessProfile.secondaryColor || undefined,
+            accentColor: c.businessProfile.accentColor || undefined,
+            additionalColors: c.businessProfile.additionalColors || undefined,
+            addresses: (c.businessProfile.addresses || []).map((address) => ({
+              type: address.type,
+              street: address.street,
+              street2: address.street2 || undefined,
+              city: address.city,
+              state: address.state,
+              zipCode: address.zipCode,
+              country: address.country,
+              reference: address.reference || undefined,
+              isPrimary: address.isPrimary || false
+            }))
+          } : undefined
+        })),
+        pagination: {
+          totalCount: customerCount,
+          totalPages: Math.ceil(customerCount / Math.max(1, pagination.pageSize))
+        }
+      } satisfies PaginatedResponse<CustomerDTO>
+    } catch (error) {
+      console.error('Error searching customers:', error)
+      throw error
+    }
+  }
 })

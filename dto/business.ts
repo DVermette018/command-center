@@ -160,6 +160,7 @@ export const updateBusinessProfileSchema = z.object({
 
 // ==================== TYPE EXPORTS ====================
 export type CreateBusinessProfileDTO = z.infer<typeof createBusinessProfileSchema>
+export type UpdateBusinessProfileDTO = z.infer<typeof updateBusinessProfileSchema>
 
 export const businessSchema = z.object({
   businessName: z.string().min(1, 'Business name is required'),

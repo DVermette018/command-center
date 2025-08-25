@@ -1,0 +1,29 @@
+{
+  "general": {
+    "title": "Profile",
+    "label_username": "Username",
+    "button_save_changes": "Save changes"
+  },
+  "members": {
+    "title": "Members",
+    "button_invite": "Invite people",
+    "placeholder_search": "Search members",
+    "actions": {
+      "edit_member": "Edit member"
+    }
+  },
+  "security": {
+    "password_section": {
+      "title": "Password",
+      "label_current": "Current password",
+      "label_new": "New password",
+      "placeholder_current": "Current password",
+      "placeholder_new": "New password",
+      "button_update": "Update"
+    },
+    "account_section": {
+      "title": "Account",
+      "button_delete": "Delete account"
+    }
+  }
+}

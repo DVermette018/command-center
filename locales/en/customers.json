@@ -1,0 +1,59 @@
+{
+  "table": {
+    "header_name": "Name",
+    "header_representative": "Representative",
+    "header_industry": "Industry",
+    "header_status": "Status",
+    "placeholder_search": "Filter name...",
+    "placeholder_status_filter": "Filter status",
+    "button_delete": "Delete",
+    "button_display": "Display",
+    "selection_summary": "{selected} of {total} row(s) selected.",
+    "actions": {
+      "label_actions": "Actions",
+      "copy_id": "Copy customer ID",
+      "view_details": "View customer details",
+      "change_status": "Change status",
+      "view_payments": "View customer payments",
+      "delete_customer": "Delete customer"
+    },
+    "messages": {
+      "copied_id": "Customer ID {id} copied to clipboard",
+      "deleted": "The customer has been deleted.",
+      "error_fetch": "Failed to fetch customers"
+    }
+  },
+  "status_modal": {
+    "title": "Change Customer Status",
+    "current_status": "Current Status:",
+    "label_new_status": "New Status",
+    "label_reason": "Reason for Change",
+    "placeholder_status": "Select a new status",
+    "placeholder_reason": "Please provide a reason for this status change",
+    "required_reason": "This change requires an explanation",
+    "warning": {
+      "title": "Sensitive Change",
+      "description": "This status change may impact the customer relationship. Please ensure this is intentional."
+    },
+    "button_update": "Update Status",
+    "messages": {
+      "success_updated": "Customer status updated to {status}",
+      "error_update": "Failed to update customer status"
+    }
+  },
+  "add_modal": {
+    "title": "New Customer",
+    "button_trigger": "New Customer",
+    "messages": {
+      "success_created": "Customer created successfully",
+      "error_create": "Failed to create customer"
+    }
+  },
+  "statuses": {
+    "lead": "Lead",
+    "prospect": "Prospect",
+    "active": "Active",
+    "inactive": "Inactive",
+    "churned": "Churned"
+  }
+}

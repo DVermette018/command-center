@@ -22,6 +22,7 @@ const profile = reactive<Partial<ProfileSchema>>({
   bio: undefined
 })
 const toast = useToast()
+const { t } = useI18n()
 
 async function onSubmit (event: FormSubmitEvent<ProfileSchema>) {
   toast.add({
@@ -59,14 +60,14 @@ function onFileClick () {
       class="mb-4"
       description="These informations will be displayed publicly."
       orientation="horizontal"
-      title="Profile"
+      :title="$t('settings.general.title')"
       variant="naked"
     >
       <UButton
         class="w-fit lg:ms-auto"
         color="neutral"
         form="settings"
-        label="Save changes"
+        :label="$t('settings.general.button_save_changes')"
         type="submit"
       />
     </UPageCard>
@@ -102,7 +103,7 @@ function onFileClick () {
       <UFormField
         class="flex max-sm:flex-col justify-between items-start gap-4"
         description="Your unique username for logging in and your profile URL."
-        label="Username"
+        :label="$t('settings.general.label_username')"
         name="username"
         required
       >

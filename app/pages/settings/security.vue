@@ -14,6 +14,8 @@ const password = reactive<Partial<PasswordSchema>>({
   new: undefined
 })
 
+const { t } = useI18n()
+
 const validate = (state: Partial<PasswordSchema>): FormError[] => {
   const errors: FormError[] = []
   if (state.current && state.new && state.current === state.new) {
@@ -25,7 +27,7 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
 
 <template>
   <UPageCard
-    title="Password"
+    :title="$t('settings.security.password_section.title')"
     description="Confirm your current password before setting a new one."
     variant="subtle"
   >
@@ -39,7 +41,7 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
         <UInput
           v-model="password.current"
           type="password"
-          placeholder="Current password"
+          :placeholder="$t('settings.security.password_section.placeholder_current')"
           class="w-full"
         />
       </UFormField>
@@ -48,22 +50,22 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
         <UInput
           v-model="password.new"
           type="password"
-          placeholder="New password"
+          :placeholder="$t('settings.security.password_section.placeholder_new')"
           class="w-full"
         />
       </UFormField>
 
-      <UButton label="Update" class="w-fit" type="submit" />
+      <UButton :label="$t('settings.security.password_section.button_update')" class="w-fit" type="submit" />
     </UForm>
   </UPageCard>
 
   <UPageCard
-    title="Account"
+    :title="$t('settings.security.account_section.title')"
     description="No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently."
     class="bg-gradient-to-tl from-error/10 from-5% to-default"
   >
     <template #footer>
-      <UButton label="Delete account" color="error" />
+      <UButton :label="$t('settings.security.account_section.button_delete')" color="error" />
     </template>
   </UPageCard>
 </template>

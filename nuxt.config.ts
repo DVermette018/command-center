@@ -7,8 +7,8 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@nuxt/icon',
     '@nuxt/image',
-    '@nuxt/test-utils',
-    '@nuxtjs/mdc'
+    '@nuxtjs/mdc',
+    '@nuxtjs/i18n'
   ],
 
   devtools: {
@@ -46,6 +46,21 @@ export default defineNuxtConfig({
 
   uiPro: {
     mdc: true
+  },
+
+  i18n: {
+    locales: [
+      { code: 'en', iso: 'en-US', name: 'English', dir: 'ltr' },
+      { code: 'es', iso: 'es-ES', name: 'Español', dir: 'ltr' }
+    ],
+    defaultLocale: 'en',
+    strategy: 'prefix_except_default',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root'
+    },
+    vueI18n: './i18n.config.ts'
   },
 
   runtimeConfig: {
