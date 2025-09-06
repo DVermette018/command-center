@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server'
 import type { PrismaClient } from '@prisma/client'
 import type { Pagination, Period, Range } from '~~/types/common'
 import type { CustomerStatus } from '~~/types/customers'
@@ -104,7 +105,13 @@ export const register = (db: PrismaClient) => ({
       }
     } catch (error) {
       console.error(`Error fetching total customer count for status ${status}:`, error)
-      throw error
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to fetch customer statistics'
+      })
     }
   },
 
@@ -179,7 +186,13 @@ export const register = (db: PrismaClient) => ({
       } satisfies PaginatedResponse<CustomerDTO>
     } catch (error) {
       console.error('Error fetching customers:', error)
-      throw error
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to fetch customers'
+      })
     }
   },
 
@@ -191,7 +204,10 @@ export const register = (db: PrismaClient) => ({
         select: CUSTOMER_SELECTOR
       })
       if (!c) {
-        throw new Error(`Customer with ID ${id} not found`)
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `Customer with ID ${id} not found`
+        })
       }
       return {
         ...c,
@@ -246,7 +262,13 @@ export const register = (db: PrismaClient) => ({
       } satisfies CustomerDTO
     } catch (error) {
       console.error(`Error fetching customer by ID ${id}:`, error)
-      throw error
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to fetch customer'
+      })
     }
   },
 
@@ -377,7 +399,20 @@ export const register = (db: PrismaClient) => ({
       }
     } catch (error) {
       console.error('Error creating customer:', error)
-      throw error
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      // Check for unique constraint violations
+      if (error instanceof Error && error.message.includes('Unique constraint')) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'Customer with this email already exists'
+        })
+      }
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to create customer'
+      })
     }
   }
 

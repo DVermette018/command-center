@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server'
 import type { PrismaClient } from '@prisma/client'
 import type { Pagination } from '~~/types/common'
 import type { PaginatedResponse } from '~~/types/api'
@@ -96,7 +97,13 @@ export const register = (db: PrismaClient) => ({
       } satisfies PaginatedResponse<ProjectListDTO>
     } catch (error) {
       console.error('Error fetching projects:', error)
-      throw error
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to fetch projects'
+      })
     }
   },
 
@@ -134,7 +141,10 @@ export const register = (db: PrismaClient) => ({
       })
 
       if (!p) {
-        throw new Error(`Project with ID ${id} not found`)
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: `Project with ID ${id} not found`
+        })
       }
 
       return {
@@ -175,7 +185,13 @@ export const register = (db: PrismaClient) => ({
       }
     } catch (error) {
       console.error('Error fetching project by ID:', error)
-      throw error
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to fetch project'
+      })
     }
   },
 
@@ -247,7 +263,13 @@ export const register = (db: PrismaClient) => ({
       }
     } catch (error) {
       console.error('Error creating project:', error)
-      throw error
+      if (error instanceof TRPCError) {
+        throw error
+      }
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to create project'
+      })
     }
   }
 })
