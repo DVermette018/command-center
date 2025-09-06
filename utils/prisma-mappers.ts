@@ -6,12 +6,12 @@ export const transformDates = <T extends Record<string, any>> (obj: T): T => {
 
   for (const key in transformed) {
     const value = transformed[key]
-    if (value instanceof Date) {
+    if (value && typeof value === 'object' && (value as any) instanceof Date) {
       (transformed as any)[key] = value.toISOString()
     } else if (value && typeof value === 'object' && !Array.isArray(value)) {
       (transformed as any)[key] = transformDates(value)
     } else if (Array.isArray(value)) {
-      (transformed as any)[key] = value.map(item =>
+      (transformed as any)[key] = value.map((item: any) =>
         item && typeof item === 'object' ? transformDates(item) : item
       )
     }
@@ -33,7 +33,7 @@ export const nullToUndefined = <T extends Record<string, any>> (obj: T): T => {
     } else if (value && typeof value === 'object' && !Array.isArray(value)) {
       (transformed as any)[key] = nullToUndefined(value)
     } else if (Array.isArray(value)) {
-      (transformed as any)[key] = value.map(item =>
+      (transformed as any)[key] = value.map((item: any) =>
         item && typeof item === 'object' ? nullToUndefined(item) : item
       )
     }
@@ -45,6 +45,6 @@ export const nullToUndefined = <T extends Record<string, any>> (obj: T): T => {
 /**
  * Compose multiple transformers
  */
-export const prismaToDTO = <T> (data: T): T => {
+export const prismaToDTO = <T extends Record<string, any>> (data: T): T => {
   return nullToUndefined(transformDates(data))
 }

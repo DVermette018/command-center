@@ -1,0 +1,61 @@
+{
+  "customers": {
+    "table": {
+    "header_name": "Nombre",
+    "header_representative": "Representante",
+    "header_industry": "Industria",
+    "header_status": "Estado",
+    "placeholder_search": "Filtrar nombre...",
+    "placeholder_status_filter": "Filtrar estado",
+    "button_delete": "Eliminar",
+    "button_display": "Mostrar",
+    "selection_summary": "{selected} de {total} fila(s) seleccionada(s).",
+    "actions": {
+      "label_actions": "Acciones",
+      "copy_id": "Copiar ID del cliente",
+      "view_details": "Ver detalles del cliente",
+      "change_status": "Cambiar estado",
+      "view_payments": "Ver pagos del cliente",
+      "delete_customer": "Eliminar cliente"
+    },
+    "messages": {
+      "copied_id": "ID del cliente {id} copiado al portapapeles",
+      "deleted": "El cliente ha sido eliminado.",
+      "error_fetch": "Error al obtener clientes"
+    }
+  },
+  "status_modal": {
+    "title": "Cambiar Estado del Cliente",
+    "current_status": "Estado Actual:",
+    "label_new_status": "Nuevo Estado",
+    "label_reason": "Motivo del Cambio",
+    "placeholder_status": "Seleccione un nuevo estado",
+    "placeholder_reason": "Por favor proporcione un motivo para este cambio de estado",
+    "required_reason": "Este cambio requiere una explicación",
+    "warning": {
+      "title": "Cambio Sensible",
+      "description": "Este cambio de estado puede impactar la relación con el cliente. Por favor asegúrese de que esto es intencional."
+    },
+    "button_update": "Actualizar Estado",
+    "messages": {
+      "success_updated": "Estado del cliente actualizado a {status}",
+      "error_update": "Error al actualizar el estado del cliente"
+    }
+  },
+  "add_modal": {
+    "title": "Nuevo Cliente",
+    "button_trigger": "Nuevo Cliente",
+    "messages": {
+      "success_created": "Cliente creado exitosamente",
+      "error_create": "Error al crear cliente"
+    }
+  },
+  "statuses": {
+    "lead": "Prospecto",
+    "prospect": "Prospect",
+    "active": "Activo",
+    "inactive": "Inactivo",
+      "churned": "Perdido"
+    }
+  }
+}

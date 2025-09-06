@@ -1,0 +1,143 @@
+{
+  "projects": {
+    "add_modal": {
+    "title": "New Project",
+    "subtitle": "Configure project details",
+    "button_trigger": "New Project",
+    "sections": {
+      "basic_info": {
+        "title": "General Information",
+        "description": "Basic project information",
+        "label_name": "Project Name",
+        "label_type": "Type",
+        "placeholder_name": "e.g., Website Redesign",
+        "placeholder_type": "Select project type",
+        "description_name": "Descriptive project name"
+      },
+      "timeline": {
+        "title": "Timeline",
+        "description": "Important project dates",
+        "label_start_date": "Start Date",
+        "label_target_date": "Target Date",
+        "description_start_date": "Project start date",
+        "description_target_date": "Target completion date"
+      },
+      "team": {
+        "title": "Team",
+        "description": "Project team setup",
+        "label_manager": "Project Manager",
+        "placeholder_manager": "Select a manager",
+        "description_manager": "Manager responsible for the project"
+      }
+    },
+    "button_create": "Create Project",
+    "messages": {
+      "error_validation": "Validation error",
+      "error_create": "Error creating project",
+      "success_created": "Project created successfully"
+    }
+  },
+  "edit_modal": {
+    "title": "Edit Project",
+    "description": "Update project information and settings",
+    "sections": {
+      "basic_info": {
+        "label_name": "Project Name",
+        "label_description": "Description",
+        "label_type": "Project Type",
+        "label_priority": "Priority",
+        "placeholder_name": "Enter project name",
+        "placeholder_description": "Describe the project",
+        "placeholder_type": "Select project type",
+        "placeholder_priority": "Select priority"
+      },
+      "timeline": {
+        "label_start_date": "Start Date",
+        "label_target_date": "Target End Date",
+        "label_actual_end_date": "Actual End Date"
+      },
+      "budget": {
+        "label_amount": "Budget Amount",
+        "label_currency": "Currency",
+        "placeholder_currency": "Select currency"
+      }
+    },
+    "button_save": "Save Changes",
+    "messages": {
+      "success_updated": "Project updated successfully",
+      "error_update": "Failed to update project"
+    }
+  },
+  "status_modal": {
+    "title": "Update Project Status",
+    "description": "Change project status from {currentStatus} to {selectedStatus}",
+    "label_new_status": "New Status",
+    "label_reason_optional": "Reason (Optional)",
+    "label_reason_required": "Reason (Required)",
+    "placeholder_status": "Select new status",
+    "placeholder_reason_optional": "Optional: Provide context for this change",
+    "placeholder_reason_required": "Please provide a reason for this status change",
+    "preview": {
+      "title": "Status Change Preview:"
+    },
+    "button_update": "Update Status",
+    "messages": {
+      "success_updated": "Project status changed to {statusLabel}",
+      "error_update": "Failed to update project status"
+    }
+  },
+  "phase_modal": {
+    "title": "Update Project Phase",
+    "description": "Change project phase from {currentPhase} to {selectedPhase}",
+    "label_new_phase": "New Phase",
+    "label_notes": "Notes (Optional)",
+    "placeholder_phase": "Select new phase",
+    "placeholder_notes": "Add any notes about this phase change...",
+    "flow": {
+      "title": "Project Phase Flow:"
+    },
+    "button_update": "Update Phase",
+    "phases": {
+      "discovery": "Discovery",
+      "planning": "Planning",
+      "design": "Design",
+      "development": "Development",
+      "review": "Review",
+      "testing": "Testing",
+      "launch": "Launch",
+      "post_launch": "Post-Launch",
+      "maintenance": "Maintenance"
+    },
+    "phase_descriptions": {
+      "discovery": "Understanding requirements and project scope",
+      "planning": "Creating project plan and timeline",
+      "design": "Creating visual designs and user experience",
+      "development": "Building the actual project deliverables",
+      "review": "Internal review and quality assurance",
+      "testing": "Testing functionality and user acceptance",
+      "launch": "Going live and initial deployment",
+      "post_launch": "Post-launch monitoring and support",
+      "maintenance": "Ongoing maintenance and updates"
+    },
+    "messages": {
+      "success_updated": "Project phase changed to {phaseLabel}",
+      "error_update": "Failed to update project phase"
+    }
+  },
+  "types": {
+    "website": "Website",
+    "mobile_app": "Mobile App",
+    "web_app": "Web App",
+    "branding": "Branding",
+    "marketing": "Marketing",
+    "ecommerce": "E-commerce",
+    "consulting": "Consulting"
+  },
+  "priorities": {
+    "low": "Low",
+    "normal": "Normal",
+    "high": "High",
+      "urgent": "Urgent"
+    }
+  }
+}

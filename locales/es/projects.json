@@ -1,0 +1,143 @@
+{
+  "projects": {
+    "add_modal": {
+    "title": "Nuevo Proyecto",
+    "subtitle": "Configure los detalles del proyecto",
+    "button_trigger": "Nuevo Proyecto",
+    "sections": {
+      "basic_info": {
+        "title": "Información General",
+        "description": "Información básica del proyecto",
+        "label_name": "Nombre del Proyecto",
+        "label_type": "Tipo",
+        "placeholder_name": "Ej: Rediseño de sitio web",
+        "placeholder_type": "Seleccione el tipo",
+        "description_name": "Nombre descriptivo del proyecto"
+      },
+      "timeline": {
+        "title": "Cronograma",
+        "description": "Fechas importantes del proyecto",
+        "label_start_date": "Fecha de Inicio",
+        "label_target_date": "Fecha Objetivo",
+        "description_start_date": "Fecha de inicio del proyecto",
+        "description_target_date": "Fecha objetivo de finalización"
+      },
+      "team": {
+        "title": "Equipo",
+        "description": "Configuración del equipo del proyecto",
+        "label_manager": "Gerente de Proyecto",
+        "placeholder_manager": "Seleccione un gerente",
+        "description_manager": "Gerente responsable del proyecto"
+      }
+    },
+    "button_create": "Crear Proyecto",
+    "messages": {
+      "error_validation": "Error de validación",
+      "error_create": "Error al crear proyecto",
+      "success_created": "Proyecto creado exitosamente"
+    }
+  },
+  "edit_modal": {
+    "title": "Editar Proyecto",
+    "description": "Actualizar información y configuración del proyecto",
+    "sections": {
+      "basic_info": {
+        "label_name": "Nombre del Proyecto",
+        "label_description": "Descripción",
+        "label_type": "Tipo de Proyecto",
+        "label_priority": "Prioridad",
+        "placeholder_name": "Ingrese el nombre del proyecto",
+        "placeholder_description": "Describa el proyecto",
+        "placeholder_type": "Seleccione el tipo de proyecto",
+        "placeholder_priority": "Seleccione la prioridad"
+      },
+      "timeline": {
+        "label_start_date": "Fecha de Inicio",
+        "label_target_date": "Fecha Objetivo",
+        "label_actual_end_date": "Fecha Real de Finalización"
+      },
+      "budget": {
+        "label_amount": "Monto del Presupuesto",
+        "label_currency": "Moneda",
+        "placeholder_currency": "Seleccione la moneda"
+      }
+    },
+    "button_save": "Guardar Cambios",
+    "messages": {
+      "success_updated": "Proyecto actualizado exitosamente",
+      "error_update": "Error al actualizar el proyecto"
+    }
+  },
+  "status_modal": {
+    "title": "Actualizar Estado del Proyecto",
+    "description": "Cambiar estado del proyecto de {currentStatus} a {selectedStatus}",
+    "label_new_status": "Nuevo Estado",
+    "label_reason_optional": "Motivo (Opcional)",
+    "label_reason_required": "Motivo (Requerido)",
+    "placeholder_status": "Seleccione nuevo estado",
+    "placeholder_reason_optional": "Opcional: Proporcione contexto para este cambio",
+    "placeholder_reason_required": "Por favor proporcione un motivo para este cambio de estado",
+    "preview": {
+      "title": "Vista Previa del Cambio de Estado:"
+    },
+    "button_update": "Actualizar Estado",
+    "messages": {
+      "success_updated": "Estado del proyecto cambiado a {statusLabel}",
+      "error_update": "Error al actualizar el estado del proyecto"
+    }
+  },
+  "phase_modal": {
+    "title": "Actualizar Fase del Proyecto",
+    "description": "Cambiar fase del proyecto de {currentPhase} a {selectedPhase}",
+    "label_new_phase": "Nueva Fase",
+    "label_notes": "Notas (Opcional)",
+    "placeholder_phase": "Seleccione nueva fase",
+    "placeholder_notes": "Agregue notas sobre este cambio de fase...",
+    "flow": {
+      "title": "Flujo de Fases del Proyecto:"
+    },
+    "button_update": "Actualizar Fase",
+    "phases": {
+      "discovery": "Descubrimiento",
+      "planning": "Planificación",
+      "design": "Diseño",
+      "development": "Desarrollo",
+      "review": "Revisión",
+      "testing": "Pruebas",
+      "launch": "Lanzamiento",
+      "post_launch": "Post-Lanzamiento",
+      "maintenance": "Mantenimiento"
+    },
+    "phase_descriptions": {
+      "discovery": "Entendimiento de requisitos y alcance del proyecto",
+      "planning": "Creación del plan del proyecto y cronograma",
+      "design": "Creación de diseños visuales y experiencia de usuario",
+      "development": "Construcción de los entregables del proyecto",
+      "review": "Revisión interna y aseguramiento de calidad",
+      "testing": "Pruebas de funcionalidad y aceptación del usuario",
+      "launch": "Puesta en vivo y despliegue inicial",
+      "post_launch": "Monitoreo y soporte post-lanzamiento",
+      "maintenance": "Mantenimiento y actualizaciones continuas"
+    },
+    "messages": {
+      "success_updated": "Fase del proyecto cambiada a {phaseLabel}",
+      "error_update": "Error al actualizar la fase del proyecto"
+    }
+  },
+  "types": {
+    "website": "Sitio Web",
+    "mobile_app": "Aplicación Móvil",
+    "web_app": "Aplicación Web",
+    "branding": "Marca",
+    "marketing": "Marketing",
+    "ecommerce": "Comercio Electrónico",
+    "consulting": "Consultoría"
+  },
+  "priorities": {
+    "low": "Baja",
+    "normal": "Normal",
+    "high": "Alta",
+      "urgent": "Urgente"
+    }
+  }
+}

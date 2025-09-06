@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm test:*)",
+      "Bash(letta list agents)",
+      "mcp__linear__list_teams",
+      "mcp__linear__create_issue",
+      "mcp__linear__list_issues",
+      "mcp__linear__list_projects",
+      "mcp__linear__list_users",
+      "mcp__linear__list_cycles",
+      "mcp__linear__list_issue_statuses",
+      "Bash(npm run test:run:*)",
+      "Bash(npm run typecheck:*)",
+      "mcp__linear__update_issue",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git merge:*)",
+      "Bash(grep:*)",
+      "Bash(npm run lint)",
+      "Bash(git commit:*)",
+      "Bash(npm run test:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm run test:*)",
+      "Bash(pnpm run:*)",
+      "mcp__linear__get_issue",
+      "Bash(pnpm test:performance:*)",
+      "Bash(pnpm test:*)",
+      "Bash(git worktree:*)",
+      "Bash(mv:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
