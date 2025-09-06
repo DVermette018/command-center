@@ -14,9 +14,17 @@
     "test": "NODE_ENV=test vitest",
     "test:ui": "NODE_ENV=test vitest --ui",
     "test:coverage": "NODE_ENV=test vitest --coverage",
-    "test:run": "NODE_ENV=test vitest run"
+    "test:run": "NODE_ENV=test vitest run",
+    "test:integration": "NODE_ENV=test vitest run --config vitest.integration.config.ts",
+    "test:integration:watch": "NODE_ENV=test vitest --config vitest.integration.config.ts",
+    "test:performance": "NODE_ENV=test vitest run --config vitest.performance.config.ts",
+    "test:performance:watch": "NODE_ENV=test vitest --config vitest.performance.config.ts",
+    "test:all": "pnpm test:run && pnpm test:integration && pnpm test:performance",
+    "ci:test": "pnpm test:run"
   },
   "dependencies": {
+    "@testcontainers/mysql": "^10.6.0",
+    "@faker-js/faker": "^8.4.1",
     "@ai-sdk/vue": "^2.0.14",
     "@appwrite.io/pink-icons": "^1.0.0",
     "@iconify-json/lucide": "^1.2.53",
@@ -27,7 +35,7 @@
     "@nuxt/test-utils": "3.19.2",
     "@nuxt/ui": "3.2.0",
     "@nuxt/ui-pro": "^3.2.0",
-    "@nuxtjs/i18n": "^10.0.6",
+    "@nuxtjs/i18n": "^9.5.5",
     "@nuxtjs/mdc": "^0.17.2",
     "@prisma/client": "^6.11.1",
     "@tanstack/query-devtools": "^5.84.0",
@@ -50,6 +58,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "testcontainers": "^10.6.0",
     "@nuxt/eslint": "^1.4.1",
     "@testing-library/vue": "^8.1.0",
     "@vitest/ui": "^3.2.4",

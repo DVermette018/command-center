@@ -1,74 +1,76 @@
 {
-  "actions": {
-    "button_save": "Guardar",
-    "button_cancel": "Cancelar",
-    "button_delete": "Eliminar",
-    "button_edit": "Editar",
-    "button_update": "Actualizar",
-    "button_create": "Crear",
-    "button_submit": "Enviar",
-    "button_confirm": "Confirmar",
-    "button_back": "Volver",
-    "link_learn_more": "Saber Más",
-    "link_view_all": "Ver Todo"
-  },
-  "navigation": {
-    "home": "Inicio",
-    "inbox": "Bandeja",
-    "customers": "Clientes",
-    "projects": "Proyectos",
-    "settings": "Configuración",
-    "general": "General",
-    "members": "Miembros",
-    "notifications": "Notificaciones",
-    "security": "Seguridad",
-    "feedback": "Comentarios",
-    "help_support": "Ayuda y Soporte"
-  },
-  "status": {
-    "active": "Activo",
-    "inactive": "Inactivo",
-    "pending": "Pendiente",
-    "completed": "Completado",
-    "failed": "Fallido",
-    "draft": "Borrador",
-    "published": "Publicado",
-    "cancelled": "Cancelado",
-    "archived": "Archivado",
-    "on_hold": "En Espera"
-  },
-  "messages": {
-    "success_saved": "Guardado exitosamente",
-    "success_updated": "Actualizado exitosamente",
-    "success_created": "Creado exitosamente",
-    "success_deleted": "Eliminado exitosamente",
-    "error_generic": "Algo salió mal",
-    "error_network": "Error de red",
-    "error_validation": "Error de validación",
-    "warning_unsaved_changes": "Tienes cambios sin guardar",
-    "info_loading": "Cargando..."
-  },
-  "validation": {
-    "required": "Este campo es requerido",
-    "email_invalid": "Formato de email inválido",
-    "password_min_length": "La contraseña debe tener al menos {min} caracteres",
-    "password_max_length": "La contraseña no puede exceder {max} caracteres",
-    "number_min": "El valor debe ser al menos {min}",
-    "number_max": "El valor no puede exceder {max}"
-  },
-  "general": {
-    "yes": "Sí",
-    "no": "No",
-    "ok": "Aceptar",
-    "loading": "Cargando...",
-    "error": "Error",
-    "success": "Éxito",
-    "warning": "Advertencia",
-    "info": "Información",
-    "all": "Todo",
-    "none": "Ninguno",
-    "search": "Buscar",
-    "filter": "Filtrar",
-    "display": "Mostrar"
+  "common": {
+    "actions": {
+      "button_save": "Guardar",
+      "button_cancel": "Cancelar",
+      "button_delete": "Eliminar",
+      "button_edit": "Editar",
+      "button_update": "Actualizar",
+      "button_create": "Crear",
+      "button_submit": "Enviar",
+      "button_confirm": "Confirmar",
+      "button_back": "Volver",
+      "link_learn_more": "Saber Más",
+      "link_view_all": "Ver Todo"
+    },
+    "navigation": {
+      "home": "Inicio",
+      "inbox": "Bandeja",
+      "customers": "Clientes",
+      "projects": "Proyectos",
+      "settings": "Configuración",
+      "general": "General",
+      "members": "Miembros",
+      "notifications": "Notificaciones",
+      "security": "Seguridad",
+      "feedback": "Comentarios",
+      "help_support": "Ayuda y Soporte"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "pending": "Pendiente",
+      "completed": "Completado",
+      "failed": "Fallido",
+      "draft": "Borrador",
+      "published": "Publicado",
+      "cancelled": "Cancelado",
+      "archived": "Archivado",
+      "on_hold": "En Espera"
+    },
+    "messages": {
+      "success_saved": "Guardado exitosamente",
+      "success_updated": "Actualizado exitosamente",
+      "success_created": "Creado exitosamente",
+      "success_deleted": "Eliminado exitosamente",
+      "error_generic": "Algo salió mal",
+      "error_network": "Error de red",
+      "error_validation": "Error de validación",
+      "warning_unsaved_changes": "Tienes cambios sin guardar",
+      "info_loading": "Cargando..."
+    },
+    "validation": {
+      "required": "Este campo es requerido",
+      "email_invalid": "Formato de email inválido",
+      "password_min_length": "La contraseña debe tener al menos {min} caracteres",
+      "password_max_length": "La contraseña no puede exceder {max} caracteres",
+      "number_min": "El valor debe ser al menos {min}",
+      "number_max": "El valor no puede exceder {max}"
+    },
+    "general": {
+      "yes": "Sí",
+      "no": "No",
+      "ok": "Aceptar",
+      "loading": "Cargando...",
+      "error": "Error",
+      "success": "Éxito",
+      "warning": "Advertencia",
+      "info": "Información",
+      "all": "Todo",
+      "none": "Ninguno",
+      "search": "Buscar",
+      "filter": "Filtrar",
+      "display": "Mostrar"
+    }
   }
 }

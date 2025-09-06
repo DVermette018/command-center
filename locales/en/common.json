@@ -1,5 +1,6 @@
 {
-  "actions": {
+  "common": {
+    "actions": {
     "button_save": "Save",
     "button_cancel": "Cancel",
     "button_delete": "Delete",
@@ -69,6 +70,7 @@
     "none": "None",
     "search": "Search",
     "filter": "Filter",
-    "display": "Display"
+      "display": "Display"
+    }
   }
 }

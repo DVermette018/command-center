@@ -27,7 +27,12 @@
       "Bash(npx tsc:*)",
       "Bash(npm install:*)",
       "Bash(pnpm run test:*)",
-      "Bash(pnpm run:*)"
+      "Bash(pnpm run:*)",
+      "mcp__linear__get_issue",
+      "Bash(pnpm test:performance:*)",
+      "Bash(pnpm test:*)",
+      "Bash(git worktree:*)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []

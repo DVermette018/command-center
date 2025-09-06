@@ -1,5 +1,6 @@
 {
-  "meta": {
+  "app": {
+    "meta": {
     "title": "Nuxt Dashboard Template",
     "description": "A modern dashboard template built with Nuxt"
   },
@@ -27,6 +28,7 @@
     }
   },
   "error": {
-    "page_not_found": "Page not found"
+      "page_not_found": "Page not found"
+    }
   }
 }

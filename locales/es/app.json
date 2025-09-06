@@ -1,5 +1,6 @@
 {
-  "meta": {
+  "app": {
+    "meta": {
     "title": "Plantilla de Dashboard Nuxt",
     "description": "Una plantilla moderna de dashboard construida con Nuxt"
   },
@@ -27,6 +28,7 @@
     }
   },
   "error": {
-    "page_not_found": "Página no encontrada"
+      "page_not_found": "Página no encontrada"
+    }
   }
 }

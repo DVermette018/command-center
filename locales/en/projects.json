@@ -1,5 +1,6 @@
 {
-  "add_modal": {
+  "projects": {
+    "add_modal": {
     "title": "New Project",
     "subtitle": "Configure project details",
     "button_trigger": "New Project",
@@ -136,6 +137,7 @@
     "low": "Low",
     "normal": "Normal",
     "high": "High",
-    "urgent": "Urgent"
+      "urgent": "Urgent"
+    }
   }
 }

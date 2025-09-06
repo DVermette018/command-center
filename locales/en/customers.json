@@ -1,5 +1,6 @@
 {
-  "table": {
+  "customers": {
+    "table": {
     "header_name": "Name",
     "header_representative": "Representative",
     "header_industry": "Industry",
@@ -54,6 +55,7 @@
     "prospect": "Prospect",
     "active": "Active",
     "inactive": "Inactive",
-    "churned": "Churned"
+      "churned": "Churned"
+    }
   }
 }

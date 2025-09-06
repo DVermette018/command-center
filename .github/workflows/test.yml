@@ -1,0 +1,147 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop, feat/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    
+    - name: Install dependencies
+      run: pnpm install
+    
+    - name: Run unit tests
+      run: pnpm test:run
+      env:
+        NODE_ENV: test
+    
+    - name: Generate coverage report
+      run: pnpm test:coverage
+      env:
+        NODE_ENV: test
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage/lcov.info
+        flags: unit-tests
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test_password
+          MYSQL_DATABASE: command_center_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    
+    - name: Install dependencies
+      run: pnpm install
+    
+    - name: Setup test database
+      run: |
+        mysql -h 127.0.0.1 -u root -ptest_password -e "CREATE DATABASE IF NOT EXISTS command_center_test;"
+      
+    - name: Run integration tests
+      run: pnpm test:integration
+      env:
+        NODE_ENV: test
+        TEST_DATABASE_URL: mysql://root:test_password@localhost:3306/command_center_test
+
+  performance-tests:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Run performance tests
+      run: pnpm test:performance
+      env:
+        NODE_ENV: test
+    
+    - name: Archive performance reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-reports
+        path: performance-reports/
+        retention-days: 30
+
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+    
+    - name: Install dependencies
+      run: pnpm install
+    
+    - name: Run linter
+      run: pnpm lint
+    
+    - name: Run type check
+      run: pnpm typecheck

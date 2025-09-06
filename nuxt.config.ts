@@ -49,18 +49,35 @@ export default defineNuxtConfig({
   },
 
   i18n: {
+    defaultLocale: 'es',
+    bundle: {
+      optimizeTranslationDirective: false
+    },
     locales: [
-      { code: 'en', iso: 'en-US', name: 'English', dir: 'ltr' },
-      { code: 'es', iso: 'es-ES', name: 'Español', dir: 'ltr' }
+      { code: 'en', files: [
+        'en/app.json',
+        'en/common.json',
+        'en/customers.json',
+        'en/projects.json',
+        'en/settings.json'
+      ] },
+      {
+        code: 'es', files: [
+          'es/app.json',
+          'es/common.json',
+          'es/customers.json',
+          'es/projects.json',
+          'es/settings.json'
+        ]
+      }
     ],
-    defaultLocale: 'en',
-    strategy: 'prefix_except_default',
     detectBrowserLanguage: {
       useCookie: true,
-      cookieKey: 'i18n_redirected',
-      redirectOn: 'root'
+      cookieKey: 'i18n_redirected'
     },
-    vueI18n: './i18n.config.ts'
+    strategy: 'prefix_except_default',
+    restructureDir: './',
+    langDir: './locales'
   },
 
   runtimeConfig: {

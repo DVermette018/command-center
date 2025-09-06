@@ -1,5 +1,6 @@
 {
-  "general": {
+  "settings": {
+    "general": {
     "title": "Profile",
     "label_username": "Username",
     "button_save_changes": "Save changes"
@@ -23,7 +24,8 @@
     },
     "account_section": {
       "title": "Account",
-      "button_delete": "Delete account"
+        "button_delete": "Delete account"
+      }
     }
   }
 }
