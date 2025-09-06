@@ -10,7 +10,14 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
-    "seed:questions": "ts-node prisma/seed-questions.ts"
+    "seed:questions": "ts-node prisma/seed-questions.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
     "@ai-sdk/vue": "^2.0.14",
@@ -46,9 +53,16 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.4.1",
+    "@playwright/test": "^1.48.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitest/coverage-v8": "^2.1.8",
+    "@vitest/ui": "^2.1.8",
+    "@vue/test-utils": "^2.5.0",
     "eslint": "^9.30.0",
+    "happy-dom": "^15.11.6",
     "tsx": "^4.20.4",
     "typescript": "^5.8.3",
+    "vitest": "^2.1.8",
     "vue-tsc": "^2.2.10"
   },
   "resolutions": {
