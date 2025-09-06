@@ -1,10 +1,15 @@
+---
 name: CI/CD - Automated Testing
 
-on:
+'on':
   push:
-    branches: [ main, develop, 'feature/*', 'fix/*', 'hotfix/*' ]
+    branches: [main, develop, "claude/*", "davevermette1/*", 'feature/*', 'fix/*', 'hotfix/*']
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   # Force CI environment for tests
@@ -15,13 +20,14 @@ env:
 
 jobs:
   test:
-    name: Test Suite
+    name: Test (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 12
 
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [20.x]
+        node-version: [18, 20]
 
     steps:
       - name: Checkout repository
@@ -48,7 +54,7 @@ jobs:
         run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - name: Setup pnpm cache
+      - name: Cache pnpm store
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
@@ -56,8 +62,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Cache node_modules and .nuxt
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            .nuxt
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}  # yamllint disable-line rule:line-length
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-modules-
+
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+        run: pnpm install --frozen-lockfile
 
       - name: Verify lockfile
         run: pnpm audit --audit-level moderate
@@ -74,8 +90,53 @@ jobs:
       - name: Run tests with coverage
         run: pnpm test:coverage
 
+      - name: Check coverage threshold
+        run: |
+          # Extract coverage percentages from JSON report
+          LINES=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+          FUNCTIONS=$(cat coverage/coverage-summary.json | jq -r '.total.functions.pct')  # yamllint disable-line rule:line-length
+          BRANCHES=$(cat coverage/coverage-summary.json | jq -r '.total.branches.pct')  # yamllint disable-line rule:line-length
+          STATEMENTS=$(cat coverage/coverage-summary.json | jq -r '.total.statements.pct')  # yamllint disable-line rule:line-length
+
+          echo "Coverage Results:"
+          echo "Lines: ${LINES}%"
+          echo "Functions: ${FUNCTIONS}%"
+          echo "Branches: ${BRANCHES}%"
+          echo "Statements: ${STATEMENTS}%"
+
+          # Check if coverage meets minimum threshold (80%)
+          THRESHOLD=80
+          FAILED=false
+
+          if (( $(echo "$LINES < $THRESHOLD" | bc -l) )); then
+            echo "❌ Lines coverage ($LINES%) is below threshold ($THRESHOLD%)"  # yamllint disable-line rule:line-length
+            FAILED=true
+          fi
+
+          if (( $(echo "$FUNCTIONS < $THRESHOLD" | bc -l) )); then
+            echo "❌ Functions coverage ($FUNCTIONS%) is below threshold ($THRESHOLD%)"  # yamllint disable-line rule:line-length
+            FAILED=true
+          fi
+
+          if (( $(echo "$BRANCHES < $THRESHOLD" | bc -l) )); then
+            echo "❌ Branches coverage ($BRANCHES%) is below threshold ($THRESHOLD%)"  # yamllint disable-line rule:line-length
+            FAILED=true
+          fi
+
+          if (( $(echo "$STATEMENTS < $THRESHOLD" | bc -l) )); then
+            echo "❌ Statements coverage ($STATEMENTS%) is below threshold ($THRESHOLD%)"  # yamllint disable-line rule:line-length
+            FAILED=true
+          fi
+
+          if [ "$FAILED" = true ]; then
+            echo "::error::Coverage threshold check failed"
+            exit 1
+          else
+            echo "✅ All coverage thresholds met"
+          fi
+
       - name: Upload coverage reports to Codecov
-        if: success()
+        if: success() && matrix.node-version == 20  # Only upload from one job to avoid duplicates
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage/lcov.info
@@ -86,31 +147,102 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Upload coverage artifact
-        if: always()
+      - name: Archive test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-node-${{ matrix.node-version }}
+          path: |
+            coverage/
+            test-results.xml
+            vitest-report.json
+          retention-days: 7
+
+      - name: Archive coverage reports
+        if: always() && matrix.node-version == 20  # Only archive from one job
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: |
             coverage/
             !coverage/tmp/
-          retention-days: 7
+          retention-days: 30
+
+  # Parallel lint and format check job for faster feedback
+  lint-and-format:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: |
+          # Check if files need formatting (will fail if changes are needed)
+          pnpm exec prettier --check "**/*.{js,ts,vue,json,md,yml,yaml}" || {
+            echo "::error::Code formatting issues found. Please run 'pnpm exec prettier --write .' to fix."  # yamllint disable-line rule:line-length
+            exit 1
+          }
+
+      - name: Lint with auto-fix check
+        run: |
+          # Run linter with --fix and check if any files changed
+          pnpm run lint --fix
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Linting issues found that can be auto-fixed:"
+            git diff --name-only
+            git diff
+            echo "Please run 'pnpm run lint --fix' to resolve these issues."
+            exit 1
+          fi
 
   # Quality Gates - ensure all checks pass
   quality-gate:
     name: Quality Gate
     runs-on: ubuntu-latest
-    needs: [test]
+    needs: [test, lint-and-format]
     if: always()
-    
+
     steps:
-      - name: Check test results
+      - name: Check all job results
         run: |
-          if [[ "${{ needs.test.result }}" != "success" ]]; then
-            echo "❌ Tests failed or were cancelled"
+          echo "Quality Gate Results:"
+          echo "===================="
+          echo "Tests: ${{ needs.test.result }}"
+          echo "Lint & Format: ${{ needs.lint-and-format.result }}"
+
+          if [[ "${{ needs.test.result }}" != "success" || "${{ needs.lint-and-format.result }}" != "success" ]]; then  # yamllint disable-line rule:line-length
+            echo ""
+            echo "❌ Quality gates failed:"
+            if [[ "${{ needs.test.result }}" != "success" ]]; then
+              echo "  - Tests: FAILED"
+            fi
+            if [[ "${{ needs.lint-and-format.result }}" != "success" ]]; then
+              echo "  - Lint & Format: FAILED"
+            fi
             exit 1
           else
-            echo "✅ All tests passed successfully"
+            echo ""
+            echo "✅ All quality gates passed successfully:"
+            echo "  - Tests: PASSED"
+            echo "  - Lint & Format: PASSED"
           fi
 
   # Build verification - ensure the project builds successfully
@@ -182,22 +314,43 @@ jobs:
   ci-success:
     name: CI Pipeline Success
     runs-on: ubuntu-latest
-    needs: [quality-gate, build-verification]
+    needs: [quality-gate, build-verification, security]
     if: always()
 
     steps:
       - name: Check overall pipeline status
         run: |
-          if [[ "${{ needs.quality-gate.result }}" == "success" && "${{ needs.build-verification.result }}" == "success" ]]; then
+          echo "CI Pipeline Results Summary:"
+          echo "============================"
+          echo "Quality Gate: ${{ needs.quality-gate.result }}"
+          echo "Build Verification: ${{ needs.build-verification.result }}"
+          echo "Security Scan: ${{ needs.security.result }}"
+          echo ""
+
+          if [[ "${{ needs.quality-gate.result }}" == "success" && "${{ needs.build-verification.result }}" == "success" && "${{ needs.security.result }}" == "success" ]]; then  # yamllint disable-line rule:line-length
             echo "✅ CI Pipeline completed successfully"
-            echo "All quality gates passed:"
-            echo "  - Tests: ✅"
-            echo "  - Build: ✅"
-            echo "  - Type Check: ✅"
-            echo "  - Lint: ✅"
+            echo ""
+            echo "All checks passed:"
+            echo "  ✅ Tests (Node 18 & 20)"
+            echo "  ✅ Coverage Threshold (≥80%)"
+            echo "  ✅ Type Check"
+            echo "  ✅ Lint & Format"
+            echo "  ✅ Build Verification"
+            echo "  ✅ Security Scan"
           else
             echo "❌ CI Pipeline failed"
-            echo "Quality gate: ${{ needs.quality-gate.result }}"
-            echo "Build verification: ${{ needs.build-verification.result }}"
+            echo ""
+            echo "Failed checks:"
+            if [[ "${{ needs.quality-gate.result }}" != "success" ]]; then
+              echo "  ❌ Quality Gate"
+            fi
+            if [[ "${{ needs.build-verification.result }}" != "success" ]]; then
+              echo "  ❌ Build Verification"
+            fi
+            if [[ "${{ needs.security.result }}" != "success" ]]; then
+              echo "  ❌ Security Scan"
+            fi
+            echo ""
+            echo "Please check the job logs above for detailed error information."  # yamllint disable-line rule:line-length
             exit 1
           fi

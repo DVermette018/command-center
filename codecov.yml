@@ -1,0 +1,43 @@
+# Codecov configuration
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 2%
+        base: auto
+    patch:
+      default:
+        target: 80%
+        threshold: 2%
+        base: auto
+
+comment:
+  layout: "reach,diff,flags,tree,footer"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+
+ignore:
+  - "coverage/**/*"
+  - "dist/**/*"
+  - "**/*.d.ts"
+  - "cypress/**/*"
+  - "test/**/*"
+  - "**/*{.,-}test.{js,cjs,mjs,ts,tsx,jsx}"
+  - "**/*{.,-}spec.{js,cjs,mjs,ts,tsx,jsx}"
+  - "**/__tests__/**"
+  - "**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*"
+  - "**/.{eslint,mocha,prettier}rc.{js,cjs,yml}"
+  - "nuxt.config.ts"
+  - "prisma/**"
+  - ".nuxt/**"
+  - ".output/**"
+
+flag_management:
+  default_rules:
+    statuses:
+      - name_prefix: codecov/
+        type: project
+        target: 80%
