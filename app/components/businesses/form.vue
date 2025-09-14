@@ -134,6 +134,9 @@ const removeAdditionalColor = (index: number): void => {
   additionalColorsList.splice(index, 1)
 }
 
+// Reactive mutations
+const createBusinessMutation = api.business.useCreateMutation()
+
 // Submit handler
 const onSubmit = async (event: FormSubmitEvent<CreateBusinessProfileDTO>): Promise<void> => {
   try {
@@ -147,7 +150,7 @@ const onSubmit = async (event: FormSubmitEvent<CreateBusinessProfileDTO>): Promi
     console.log('Submitting business profile:', payload)
 
     // Call your API endpoint
-    await api.business.create().mutateAsync(payload)
+    await createBusinessMutation(payload)
 
     toast.add({
       title: 'Registro exitoso',
@@ -184,7 +187,7 @@ onMounted(() => {
 
 <template>
   <UDashboardPanel id="business-profile">
-    <div class="max-w-4xl mx-auto">
+    <div >
       <UForm
         id="business-profile-form"
         :schema="createBusinessProfileSchema"

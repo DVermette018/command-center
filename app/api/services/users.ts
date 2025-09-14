@@ -6,17 +6,7 @@ import type { ListUserDTO, UserDTO, CreateUserDTO, UpdateUserDTO } from '~~/dto/
 
 const trpc = () => useNuxtApp().$trpc
 
-export interface UserService {
-  getAllByRoles: (pagination: Pagination & { roles: UserRole[]}) => ReturnType<typeof userQueries.useGetAllByRolesQuery>
-  getAll: (pagination: Pagination) => ReturnType<typeof userQueries.useGetAllQuery>
-  getById: (id: string) => ReturnType<typeof userQueries.useGetByIdQuery>
-  create: () => ReturnType<typeof userQueries.useCreateMutation>
-  update: () => ReturnType<typeof userQueries.useUpdateMutation>
-  delete: () => ReturnType<typeof userQueries.useDeleteMutation>
-  reactivate: () => ReturnType<typeof userQueries.useReactivateMutation>
-}
-
-export const userQueries = defineService({
+export const registerService = defineService({
   queries: {
     getAllByRoles: {
       queryKey: (p: Pagination & { roles: UserRole[]}) => ['USERS_GET_BY_ROLES', String(p?.pageIndex), String(p?.pageSize), p?.roles?.join(',')],
@@ -62,13 +52,3 @@ export const userQueries = defineService({
     }
   }
 })
-
-export const userService: UserService = {
-  getAllByRoles: (p: Pagination & { roles: UserRole[]}) => userQueries.useGetAllByRolesQuery(p),
-  getAll: (p: Pagination) => userQueries.useGetAllQuery(p),
-  getById: (id: string) => userQueries.useGetByIdQuery(id),
-  create: () => userQueries.useCreateMutation(),
-  update: () => userQueries.useUpdateMutation(),
-  delete: () => userQueries.useDeleteMutation(),
-  reactivate: () => userQueries.useReactivateMutation()
-}

@@ -138,7 +138,7 @@
             <p class="text-sm font-medium">Phase Progress</p>
             <p class="text-sm text-gray-600">{{ phaseProgress }}%</p>
           </div>
-          <UProgress :value="phaseProgress" class="h-2" />
+          <UProgress v-model="phaseProgress" class="h-2" />
           <p class="text-xs text-gray-600">{{ getPhaseProgressDescription() }}</p>
         </div>
       </UPageCard>
@@ -210,7 +210,7 @@ const api = useApi()
 // No modal refs needed - all modals are self-contained
 
 // Phase history data
-const { data: phaseHistory, isLoading: isLoadingPhases } = api.projects.getPhaseHistory({ projectId: props.project.id })
+const { data: phaseHistory, isLoading: isLoadingPhases } = api.projects.useGetPhaseHistoryQuery(props.project.id)
 
 // Computed properties
 const teamMemberCount = computed(() => {

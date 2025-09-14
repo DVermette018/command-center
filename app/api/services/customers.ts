@@ -12,15 +12,7 @@ export interface PeriodVariationByStatusParams {
   range: Range
 }
 
-export interface CustomerService {
-  getPeriodVariationByStatus: (params: PeriodVariationByStatusParams) => ReturnType<typeof customerQueries.useGetPeriodVariationByStatusQuery>
-  getAll: (pagination: Pagination) => ReturnType<typeof customerQueries.useGetAllQuery>
-  getById: (id: string) => ReturnType<typeof customerQueries.useGetByIdQuery>
-  create: () => ReturnType<typeof customerQueries.useCreateMutation>
-  updateStatus: () => ReturnType<typeof customerQueries.useUpdateStatusMutation>
-}
-
-export const customerQueries = defineService({
+export const registerService = defineService({
   queries: {
     getPeriodVariationByStatus: {
       queryKey: (p: PeriodVariationByStatusParams) => ['CUSTOMERS_GET_PERIOD_VARIATION_BY_STATUS', p.status, p.period, p.range.start.toString(), p.range.end.toString()],
@@ -52,14 +44,14 @@ export const customerQueries = defineService({
       request: (payload: { id: string; status: CustomerStatus; reason?: string }) => 
         trpc().customers.updateStatus.mutate(payload),
       cacheKey: (_payload, res) => [['CUSTOMERS_GET_ALL'], ['CUSTOMER_DETAIL', (res as CustomerDTO).id]]
+    },
+    update: {
+      request: (payload: UpdateCustomerSchema) => trpc().customers.update.mutate(payload),
+      cacheKey: (payload) => [['CUSTOMERS_GET_ALL'], ['CUSTOMER_DETAIL', payload.id]]
+    },
+    delete: {
+      request: (payload: { id: string }) => trpc().customers.delete.mutate(payload),
+      cacheKey: (payload) => [['CUSTOMERS_GET_ALL'], ['CUSTOMER_DETAIL', payload.id]]
     }
   }
 })
-
-export const customerService: CustomerService = {
-  getPeriodVariationByStatus: (p: PeriodVariationByStatusParams) => customerQueries.useGetPeriodVariationByStatusQuery(p),
-  getAll: (p: Pagination) => customerQueries.useGetAllQuery(p),
-  getById: (id: string) => customerQueries.useGetByIdQuery(id),
-  create: () => customerQueries.useCreateMutation(),
-  updateStatus: () => customerQueries.useUpdateStatusMutation(),
-}

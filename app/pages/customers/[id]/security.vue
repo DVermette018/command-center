@@ -140,6 +140,9 @@ const removeAdditionalColor = (index: number): void => {
   additionalColorsList.splice(index, 1)
 }
 
+// Reactive mutations
+const storeBusinessMutation = api.business.useStoreMutation()
+
 // Submit handler
 const onSubmit = async (event: FormSubmitEvent<CreateBusinessProfileDTO>): Promise<void> => {
   try {
@@ -163,7 +166,7 @@ const onSubmit = async (event: FormSubmitEvent<CreateBusinessProfileDTO>): Promi
     console.log('Submitting business profile:', payload)
 
     // Call your API endpoint
-    await api.business.store(payload)
+    await storeBusinessMutation(payload)
 
     toast.add({
       title: 'Registro exitoso',
@@ -341,10 +344,10 @@ onMounted(() => {
             />
           </UFormField>
 
-          <USeparator v-if="businessForm.category === BusinessCategory.OTHER"/>
+          <USeparator v-if="businessForm.category === 'OTHER'"/>
 
           <UFormField
-            v-if="businessForm.category === BusinessCategory.OTHER"
+            v-if="businessForm.category === 'OTHER'"
             class="flex max-sm:flex-col justify-between items-start gap-4"
             description="Especifique la categoría de su negocio"
             label="Categoría Personalizada"

@@ -1,25 +1,10 @@
 import { defineService } from '~/api/services/helpers'
-import type { PaginatedResponse } from '~~/types/api'
-import type { Pagination, Range } from '~~/types/common'
-import { type CreateProjectDTO, type ProjectDTO, type UpdateProjectDTO, type CreateProjectTeamMemberDTO, type ProjectTeamMemberDTO } from '~~/dto/project'
+import type { Pagination } from '~~/types/common'
+import { type CreateProjectDTO, type CreateProjectTeamMemberDTO, type UpdateProjectDTO } from '~~/dto/project'
 
 const trpc = () => useNuxtApp().$trpc
 
-export interface ProjectService {
-  getAll: (pagination: Pagination) => ReturnType<typeof projectQueries.useGetAllQuery>
-  getById: (id: string) => ReturnType<typeof projectQueries.useGetByIdQuery>
-  create: () => ReturnType<typeof projectQueries.useStoreMutation>
-  update: () => ReturnType<typeof projectQueries.useUpdateMutation>
-  updateStatus: () => ReturnType<typeof projectQueries.useUpdateStatusMutation>
-  updatePhase: () => ReturnType<typeof projectQueries.useUpdatePhaseMutation>
-  addTeamMember: () => ReturnType<typeof projectQueries.useAddTeamMemberMutation>
-  removeTeamMember: () => ReturnType<typeof projectQueries.useRemoveTeamMemberMutation>
-  getTeamMembers: (projectId: string) => ReturnType<typeof projectQueries.useGetTeamMembersQuery>
-  getPhaseHistory: (projectId: string) => ReturnType<typeof projectQueries.useGetPhaseHistoryQuery>
-  delete: () => ReturnType<typeof projectQueries.useDeleteMutation>
-}
-
-export const projectQueries = defineService({
+export const registerService = defineService({
   queries: {
     getAll: {
       queryKey: (p: Pagination) => ['PROJECTS_GET_ALL', String(p?.pageIndex), String(p?.pageSize)],
@@ -48,11 +33,19 @@ export const projectQueries = defineService({
       cacheKey: (payload) => [['PROJECTS_GET_ALL'], ['PROJECTS_DETAIL', payload.id]]
     },
     updateStatus: {
-      request: (payload: { id: string; status: 'DRAFT' | 'PENDING_APPROVAL' | 'ACTIVE' | 'ON_HOLD' | 'COMPLETED' | 'CANCELLED' | 'ARCHIVED'; reason?: string }) => trpc().projects.updateStatus.mutate(payload),
+      request: (payload: {
+        id: string;
+        status: 'DRAFT' | 'PENDING_APPROVAL' | 'ACTIVE' | 'ON_HOLD' | 'COMPLETED' | 'CANCELLED' | 'ARCHIVED';
+        reason?: string
+      }) => trpc().projects.updateStatus.mutate(payload),
       cacheKey: (payload) => [['PROJECTS_GET_ALL'], ['PROJECTS_DETAIL', payload.id]]
     },
     updatePhase: {
-      request: (payload: { id: string; phase: 'DISCOVERY' | 'PLANNING' | 'DESIGN' | 'DEVELOPMENT' | 'REVIEW' | 'TESTING' | 'LAUNCH' | 'POST_LAUNCH' | 'MAINTENANCE'; notes?: string }) => trpc().projects.updatePhase.mutate(payload),
+      request: (payload: {
+        id: string;
+        phase: 'DISCOVERY' | 'PLANNING' | 'DESIGN' | 'DEVELOPMENT' | 'REVIEW' | 'TESTING' | 'LAUNCH' | 'POST_LAUNCH' | 'MAINTENANCE';
+        notes?: string
+      }) => trpc().projects.updatePhase.mutate(payload),
       cacheKey: (payload) => [['PROJECTS_GET_ALL'], ['PROJECTS_DETAIL', payload.id], ['PROJECT_PHASE_HISTORY', payload.id]]
     },
     addTeamMember: {
@@ -69,17 +62,3 @@ export const projectQueries = defineService({
     }
   }
 })
-
-export const projectService: ProjectService = {
-  getAll: (p: Pagination) => projectQueries.useGetAllQuery(p),
-  getById: (id: string) => projectQueries.useGetByIdQuery(id),
-  getTeamMembers: (projectId: string) => projectQueries.useGetTeamMembersQuery(projectId),
-  getPhaseHistory: (projectId: string) => projectQueries.useGetPhaseHistoryQuery(projectId),
-  create: () => projectQueries.useStoreMutation(),
-  update: () => projectQueries.useUpdateMutation(),
-  updateStatus: () => projectQueries.useUpdateStatusMutation(),
-  updatePhase: () => projectQueries.useUpdatePhaseMutation(),
-  addTeamMember: () => projectQueries.useAddTeamMemberMutation(),
-  removeTeamMember: () => projectQueries.useRemoveTeamMemberMutation(),
-  delete: () => projectQueries.useDeleteMutation(),
-}

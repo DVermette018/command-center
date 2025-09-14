@@ -41,7 +41,7 @@ const links = [[{
 const api = useApi()
 
 // Fetch project data
-const { data: project, error, status, refetch } = api.projects.getById(projectId)
+const { data: project, status, refetch } = api.projects.useGetByIdQuery(projectId)
 
 // Current tab state
 const currentTab = computed(() => {
@@ -90,7 +90,7 @@ if (status.value === 'error') {
     </template>
 
     <template #body>
-      <div v-if="project" class="p-6">
+      <div v-if="project">
         <!-- Overview Tab (default) -->
         <ProjectsProjectOverview
           v-if="currentTab === 'overview'"

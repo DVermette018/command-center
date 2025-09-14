@@ -19,14 +19,27 @@ const toast = useToast()
 const route = useRoute()
 const projectId = route.params.id as string
 
+// Reactive queries
+const {
+  data: templates,
+  isLoading: isLoadingTemplates,
+  error: templatesError
+} = api.questions.useGetTemplatesForPlanQuery('WEBSITE')
+
+const saveDraftMutation = api.questions.useSaveDraftMutation()
+const saveAnswersMutation = api.questions.useSaveAnswersMutation()
+
 // State
 const currentSectionIndex = ref(0)
 const questionTemplates = ref<ListQuestionTemplateDTO[]>([])
 const projectAnswers = ref<Map<string, any>>(new Map())
 const errors = ref<Map<string, string>>(new Map())
-const isLoading = ref(false)
-const isSaving = ref(false)
 const draftSaveTimeout = ref<NodeJS.Timeout>()
+
+// Computed loading states
+const isLoading = computed(() =>
+  isLoadingTemplates.value || isLoadingAnswers.value || isLoadingSection.value
+)
 
 // Section mapping
 const sectionInfo = {
@@ -84,7 +97,7 @@ const currentQuestions = computed(() => {
 const progress = computed(() => {
   const totalSections = questionTemplates.value.length
   const completedSections = currentSectionIndex.value
-  return Math.round((completedSections / totalSections) * 100)
+  return Math.ceil((completedSections / totalSections) * 100)
 })
 
 const currentSectionProgress = computed(() => {
@@ -92,7 +105,7 @@ const currentSectionProgress = computed(() => {
 
   const requiredQuestions = currentQuestions.value.filter(q => q.required)
   const answeredRequired = requiredQuestions.filter(q => {
-    const answer = projectAnswers.value.get(q.code)
+    const answer = projectAnswers.value.get(q.id)
     return answer !== null && answer !== undefined && answer !== '' &&
       (Array.isArray(answer) ? answer.length > 0 : true)
   })
@@ -104,7 +117,7 @@ const canProceed = computed(() => {
   return currentQuestions.value
     .filter(q => q.required)
     .every(q => {
-      const answer = projectAnswers.value.get(q.code)
+      const answer = projectAnswers.value.get(q.id)
       return answer !== null && answer !== undefined && answer !== '' &&
         (Array.isArray(answer) ? answer.length > 0 : true)
     })
@@ -112,37 +125,55 @@ const canProceed = computed(() => {
 
 const isLastSection = computed(() => currentSectionIndex.value === questionTemplates.value.length - 1)
 
-// Load questions
-const loadQuestions = async () => {
-  isLoading.value = true
-  try {
-    // Load question templates for this plan type
-    const templates: ListQuestionTemplateDTO[] = await api.questions.getTemplatesForPlan('WEBSITE')
+// Load existing answers (reactive)
+const {
+  data: existingAnswers,
+  isLoading: isLoadingAnswers
+} = api.questions.useGetProjectAnswersQuery(projectId)
 
-    questionTemplates.value = templates.sort((a: ListQuestionTemplateDTO, b: ListQuestionTemplateDTO) => a.order - b.order)
+const {
+  data: lastCompletedSection,
+  isLoading: isLoadingSection
+} = api.questions.useGetLastCompletedSectionQuery(projectId)
 
-    const existingAnswers = await api.questions.getProjectAnswers(projectId)
+// Process templates reactively
+watch(templates, (newTemplates) => {
+  if (newTemplates?.length) {
+    console.log('Processing templates:', newTemplates)
+    questionTemplates.value = [...newTemplates].sort((a: ListQuestionTemplateDTO, b: ListQuestionTemplateDTO) => a.order - b.order)
+    console.log('Sorted templates:', questionTemplates.value)
+  }
+}, { immediate: true })
 
-    if (existingAnswers.length) {
-      existingAnswers.forEach((answer: ListAnswerDTO) => {
-        projectAnswers.value.set(answer.questionId, answer.answer)
-      })
+// Process existing answers reactively
+watch(existingAnswers, (answers) => {
+  if (answers?.length) {
+    console.log('Processing existing answers:', answers)
+    answers.forEach((answer: ListAnswerDTO) => {
+      projectAnswers.value.set(answer.questionId, answer.answer)
+    })
+  }
+}, { immediate: true })
 
-      // Resume from last incomplete section
-      const lastCompletedSection = await api.questions.getLastCompletedSection(projectId)
-      currentSectionIndex.value = Math.min(lastCompletedSection + 1, questionTemplates.value.length - 1)
-    }
-  } catch (error) {
-    console.error('Error loading questions:', error)
+// Resume from last completed section
+watch(lastCompletedSection, (section) => {
+  if (typeof section === 'number' && questionTemplates.value.length) {
+    currentSectionIndex.value = Math.min(section + 1, questionTemplates.value.length - 1)
+  }
+}, { immediate: true })
+
+// Handle errors
+watch(templatesError, (error) => {
+  if (error) {
+    console.error('Error loading templates:', error)
     toast.add({
       title: 'Error',
-      description: 'Failed to load questions. Please try again.',
-      icon: 'i-lucide-alert-circle'
+      description: 'Failed to load question templates. Please try again.',
+      icon: 'i-lucide-alert-circle',
+      color: 'error'
     })
-  } finally {
-    isLoading.value = false
   }
-}
+})
 
 // Validation
 const validateAnswer = (question: ListQuestionDTO, answer: any): string | null => {
@@ -153,11 +184,11 @@ const validateAnswer = (question: ListQuestionDTO, answer: any): string | null =
   if (question.validation) {
     const validation = JSON.parse(question.validation)
 
-    if (validation.minLength && answer.length < validation.minLength) {
+    if (validation.minLength && answer?.length < validation.minLength) {
       return `Minimum ${validation.minLength} characters required`
     }
 
-    if (validation.maxLength && answer.length > validation.maxLength) {
+    if (validation.maxLength && answer?.length > validation.maxLength) {
       return `Maximum ${validation.maxLength} characters allowed`
     }
 
@@ -194,25 +225,24 @@ const validateAnswer = (question: ListQuestionDTO, answer: any): string | null =
   return null
 }
 
-// Save answers
+// Save answers using mutations
 const saveAnswers = async (isDraft = false) => {
-  isSaving.value = true
-  try {
-    const answersToSave = currentQuestions.value.map(question => ({
-      projectId: projectId,
-      questionId: question.id,
-      questionCode: question.code,
-      answer: projectAnswers.value.get(question.code) || null
-    }))
+  const answersToSave = currentQuestions.value.map(question => ({
+    projectId: projectId,
+    questionId: question.id,
+    questionCode: question.code,
+    answer: projectAnswers.value.get(question.id) || null
+  }))
 
+  try {
     if (isDraft) {
-      await api.questions.saveDraft({
+      await saveDraftMutation({
         projectId: projectId,
         sectionIndex: currentSectionIndex.value,
         answers: answersToSave
       })
     } else {
-      await api.questions.saveAnswers({
+      await saveAnswersMutation({
         projectId: projectId,
         answers: answersToSave
       })
@@ -229,11 +259,11 @@ const saveAnswers = async (isDraft = false) => {
       toast.add({
         title: 'Error',
         description: 'Failed to save answers. Please try again.',
-        icon: 'i-lucide-alert-circle'
+        icon: 'i-lucide-alert-circle',
+        color: 'error'
       })
     }
-  } finally {
-    isSaving.value = false
+    throw error // Re-throw to handle in calling functions
   }
 }
 
@@ -260,13 +290,13 @@ const nextSection = async () => {
   // Validate all required questions
   let hasErrors = false
   currentQuestions.value.forEach(question => {
-    const answer = projectAnswers.value.get(question.code)
+    const answer = projectAnswers.value.get(question.id)
     const error = validateAnswer(question, answer)
     if (error) {
-      errors.value.set(question.code, error)
+      errors.value.set(question.id, error)
       hasErrors = true
     } else {
-      errors.value.delete(question.code)
+      errors.value.delete(question.id)
     }
   })
 
@@ -296,11 +326,13 @@ const previousSection = () => {
   }
 }
 
+// AI Prompt generation mutation
+const generateAIPromptMutation = api.questions.useGenerateAIPromptMutation()
+
 const completeSetup = async () => {
-  isLoading.value = true
   try {
     // Generate AI prompt
-    const aiPrompt = await api.questions.generateAIPrompt(projectId)
+    await generateAIPromptMutation(projectId)
 
     toast.add({
       title: 'Setup Complete!',
@@ -309,21 +341,20 @@ const completeSetup = async () => {
     })
 
     // Emit complete event with all answers
-    // const allAnswers = Array.from(projectAnswers.value.entries()).map(([code, answer]) => ({
-    //   questionCode: code,
-    //   answer
-    // }))
-    //
-    // emit('complete', allAnswers)
+    const allAnswers = Array.from(projectAnswers.value.entries()).map(([code, answer]) => ({
+      questionCode: code,
+      answer
+    }))
+
+    emit('complete', allAnswers)
   } catch (error) {
     console.error('Error completing setup:', error)
     toast.add({
       title: 'Error',
       description: 'Failed to complete setup. Please try again.',
-      icon: 'i-lucide-alert-circle'
+      icon: 'i-lucide-alert-circle',
+      color: 'error'
     })
-  } finally {
-    isLoading.value = false
   }
 }
 
@@ -334,22 +365,20 @@ const updateAnswer = (questionCode: string, value: any) => {
   scheduleDraftSave()
 }
 
-// Initialize
-onMounted(() => {
-  loadQuestions()
-})
-
+// Cleanup on unmount
 onUnmounted(() => {
   if (draftSaveTimeout.value) {
     clearTimeout(draftSaveTimeout.value)
-    saveAnswers(true)
+    // Save draft if there are pending changes
+    if (projectAnswers.value.size > 0) {
+      saveAnswers(true).catch(console.error)
+    }
   }
 })
 </script>
 
 <template>
   <div class="h-full flex flex-col">
-    <!-- Header with progress -->
     <div class="border-b bg-gray-50 dark:bg-gray-900">
       <UContainer class="py-4">
         <div class="flex items-center justify-between mb-4">
@@ -371,7 +400,7 @@ onUnmounted(() => {
             <span class="text-gray-500">Overall Progress</span>
             <span class="font-medium">{{ progress }}%</span>
           </div>
-          <UProgress :animation="false" :value="progress"/>
+          <UProgress v-model="progress"/>
         </div>
 
         <!-- Section tabs -->
@@ -403,10 +432,26 @@ onUnmounted(() => {
     <!-- Main content -->
     <div class="flex-1 overflow-y-auto">
       <UContainer class="py-8">
-        <div v-if="isLoading" class="flex justify-center py-12">
+        <!-- Loading state -->
+        <div v-if="isLoading" class="flex flex-col items-center justify-center py-12 space-y-4">
           <UIcon class="animate-spin w-8 h-8 text-gray-400" name="i-lucide-loader-2"/>
+          <div class="text-center text-sm text-gray-500">
+            <div v-if="isLoadingTemplates">Loading question templates...</div>
+            <div v-else-if="isLoadingAnswers">Loading your previous answers...</div>
+            <div v-else-if="isLoadingSection">Loading progress...</div>
+          </div>
         </div>
 
+        <!-- Error state -->
+        <div v-else-if="templatesError" class="flex flex-col items-center justify-center py-12 space-y-4">
+          <UIcon class="w-12 h-12 text-red-400" name="i-lucide-alert-circle"/>
+          <div class="text-center">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Failed to load setup</h3>
+            <p class="text-sm text-gray-500 mt-1">Please try refreshing the page.</p>
+          </div>
+        </div>
+
+        <!-- Content -->
         <div v-else-if="currentTemplate" class="max-w-3xl mx-auto">
           <!-- Section header -->
           <div class="mb-8">
@@ -422,15 +467,6 @@ onUnmounted(() => {
             <p class="text-gray-600 dark:text-gray-400">
               {{ sectionInfo[currentTemplate.section]?.description }}
             </p>
-
-            <!-- Section progress -->
-            <div class="mt-4 space-y-2">
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-500">Section Progress</span>
-                <span class="font-medium">{{ currentSectionProgress }}%</span>
-              </div>
-              <UProgress :animation="false" :value="currentSectionProgress" size="sm"/>
-            </div>
           </div>
 
           <!-- Questions -->
@@ -441,91 +477,95 @@ onUnmounted(() => {
               class="group"
             >
               <UForm
-                :error="errors.get(question.code)"
+                :error="errors.get(question.id)"
                 :help="question.helpText"
                 :label="question.question"
                 :required="question.required"
               >
-                <!-- Text input -->
-                <UInput
-                  v-if="question.type === 'TEXT' || question.type === 'EMAIL' || question.type === 'URL'"
-                  :model-value="projectAnswers.get(question.code) || ''"
-                  :placeholder="question.placeholder"
-                  :type="question.type === 'EMAIL' ? 'email' : question.type === 'URL' ? 'url' : 'text'"
-                  @update:model-value="(value) => updateAnswer(question.code, value)"
-                />
+                <UFormField :error="errors.get(question.id)" :label="question.question">
+                  <!-- Text input -->
+                  <UInput
+                    v-if="question.type === 'TEXT' || question.type === 'EMAIL' || question.type === 'URL'"
+                    :model-value="projectAnswers.get(question.id) || ''"
+                    :placeholder="question.placeholder || ''"
+                    :type="question.type === 'EMAIL' ? 'email' : question.type === 'URL' ? 'url' : 'text'"
+                    @update:model-value="(value) => updateAnswer(question.id, value)"
+                  />
 
-                <!-- Textarea -->
-                <UTextarea
-                  v-else-if="question.type === 'TEXTAREA'"
-                  :model-value="projectAnswers.get(question.code) || ''"
-                  :placeholder="question.placeholder"
-                  :rows="4"
-                  @update:model-value="(value) => updateAnswer(question.code, value)"
-                />
+                  <!-- Textarea -->
+                  <UTextarea
+                    v-else-if="question.type === 'TEXTAREA'"
+                    :model-value="projectAnswers.get(question.id) || ''"
+                    :placeholder="question.placeholder || ''"
+                    :rows="4"
+                    class="w-full"
+                    @update:model-value="(value) => updateAnswer(question.id, value)"
+                  />
 
-                <!-- Select -->
-                <USelectMenu
-                  v-else-if="question.type === 'SELECT'"
-                  :model-value="projectAnswers.get(question.code) || ''"
-                  :options="JSON.parse(question.options || '[]')"
-                  :placeholder="question.placeholder || 'Select an option'"
-                  option-attribute="label"
-                  value-attribute="value"
-                  @update:model-value="(value) => updateAnswer(question.code, value)"
-                />
+                  <!-- Select -->
+                  <USelectMenu
+                    v-else-if="question.type === 'SELECT'"
+                    :model-value="projectAnswers.get(question.id) || JSON.parse(question.options)[0]?.label || ''"
+                    :items="JSON.parse(question.options || '[]')"
+                    :placeholder="question.placeholder || 'Select an option'"
+                    option-attribute="label"
+                    value-attribute="value"
+                    class="w-96"
+                    @update:model-value="(value) => updateAnswer(question.id, value)"
+                  />
 
-                <!-- Multi-select -->
-                <div v-else-if="question.type === 'MULTI_SELECT'" class="space-y-2">
-                  <div
-                    v-for="option in JSON.parse(question.options || '[]')"
-                    :key="option.value"
-                    class="flex items-start"
-                  >
-                    <UCheckbox
-                      :model-value="(projectAnswers.get(question.code) || []).includes(option.value)"
-                      @update:model-value="(checked) => {
-                        const current = projectAnswers.get(question.code) || []
+                  <!-- Multi-select -->
+                  <div v-else-if="question.type === 'MULTI_SELECT'" class="space-y-2">
+                    <div
+                      v-for="option in JSON.parse(question.options || '[]')"
+                      :key="option.value"
+                      class="flex items-start"
+                    >
+                      <UCheckbox
+                        :model-value="(projectAnswers.get(question.id) || []).includes(option.value)"
+                        @update:model-value="(checked) => {
+                        const current = projectAnswers.get(question.id) || []
                         const updated = checked
                           ? [...current, option.value]
                           : current.filter((v: string) => v !== option.value)
-                        updateAnswer(question.code, updated)
+                        updateAnswer(question.id, updated)
                       }"
-                    >
-                      <template #label>
-                        <span class="ml-2">{{ option.label }}</span>
-                      </template>
-                    </UCheckbox>
+                      >
+                        <template #label>
+                          <span class="ml-2">{{ option.label }}</span>
+                        </template>
+                      </UCheckbox>
+                    </div>
+                    <p v-if="question.maxSelections" class="text-sm text-gray-500">
+                      Maximum {{ question.maxSelections }} selections
+                      ({{ (projectAnswers.get(question.id) || []).length }} selected)
+                    </p>
                   </div>
-                  <p v-if="question.maxSelections" class="text-sm text-gray-500">
-                    Maximum {{ question.maxSelections }} selections
-                    ({{ (projectAnswers.get(question.code) || []).length }} selected)
-                  </p>
-                </div>
 
-                <!-- Toggle -->
-                <UToggle
-                  v-else-if="question.type === 'TOGGLE'"
-                  :model-value="projectAnswers.get(question.code) || false"
-                  @update:model-value="(value) => updateAnswer(question.code, value)"
-                />
+                  <!-- Toggle -->
+                  <USwitch
+                    v-else-if="question.type === 'TOGGLE'"
+                    :model-value="projectAnswers.get(question.id) || false"
+                    @update:model-value="(value) => updateAnswer(question.id, value)"
+                  />
 
-                <!-- Number -->
-                <UInput
-                  v-else-if="question.type === 'NUMBER'"
-                  :model-value="projectAnswers.get(question.code) || ''"
-                  :placeholder="question.placeholder"
-                  type="number"
-                  @update:model-value="(value) => updateAnswer(question.code, value)"
-                />
+                  <!-- Number -->
+                  <UInput
+                    v-else-if="question.type === 'NUMBER'"
+                    :model-value="projectAnswers.get(question.id) || ''"
+                    :placeholder="question.placeholder || ''"
+                    type="number"
+                    @update:model-value="(value) => updateAnswer(question.id, value)"
+                  />
 
-                <!-- Date -->
-                <UInput
-                  v-else-if="question.type === 'DATE'"
-                  :model-value="projectAnswers.get(question.code) || ''"
-                  type="date"
-                  @update:model-value="(value) => updateAnswer(question.code, value)"
-                />
+                  <!-- Date -->
+                  <UInput
+                    v-else-if="question.type === 'DATE'"
+                    :model-value="projectAnswers.get(question.id) || ''"
+                    type="date"
+                    @update:model-value="(value) => updateAnswer(question.id, value)"
+                  />
+                </UFormField>
               </UForm>
             </div>
           </div>
@@ -539,7 +579,7 @@ onUnmounted(() => {
         <div class="flex items-center justify-between">
           <UButton
             v-if="currentSectionIndex > 0"
-            color="gray"
+            color="info"
             icon="i-lucide-arrow-left"
             variant="ghost"
             @click="previousSection"
@@ -549,15 +589,9 @@ onUnmounted(() => {
           <div v-else/>
 
           <div class="flex items-center gap-2">
-            <span v-if="isSaving" class="text-sm text-gray-500 flex items-center gap-2">
-              <UIcon class="animate-spin w-4 h-4" name="i-lucide-loader-2"/>
-              Saving...
-            </span>
-
             <UButton
               :color="canProceed ? 'primary' : 'neutral'"
-              :disabled="!canProceed || isSaving"
-              :loading="isLoading"
+              :disabled="!canProceed ||  isLoading"
               @click="nextSection"
             >
               <template v-if="isLastSection">

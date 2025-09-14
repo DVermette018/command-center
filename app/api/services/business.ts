@@ -5,17 +5,7 @@ import type { BusinessDTO, CreateBusinessProfileDTO, UpdateBusinessProfileDTO } 
 
 const trpc = () => useNuxtApp().$trpc
 
-export interface BusinessService {
-  getAll: (pagination: Pagination) => ReturnType<typeof businessQueries.useGetAllQuery>
-  getById: (id: string) => ReturnType<typeof businessQueries.useGetByIdQuery>
-  search: (params: { query: string } & Pagination) => ReturnType<typeof businessQueries.useSearchQuery>
-  store: () => ReturnType<typeof businessQueries.useStoreMutation>
-  create: () => ReturnType<typeof businessQueries.useStoreMutation>
-  update: () => ReturnType<typeof businessQueries.useUpdateMutation>
-  delete: () => ReturnType<typeof businessQueries.useDeleteMutation>
-}
-
-export const businessQueries = defineService({
+export const registerService = defineService({
   queries: {
     getAll: {
       queryKey: (p: Pagination) => ['BUSINESSES_GET_ALL', String(p?.pageIndex), String(p?.pageSize)],
@@ -32,6 +22,10 @@ export const businessQueries = defineService({
   },
   mutations: {
     store: {
+      request: (data: CreateBusinessProfileDTO) => trpc().business.store.mutate(data),
+      cacheKey: () => [['BUSINESSES_GET_ALL'], ['BUSINESSES_SEARCH']]
+    },
+    create: {
       request: (data: CreateBusinessProfileDTO) => trpc().business.store.mutate(data),
       cacheKey: () => [['BUSINESSES_GET_ALL'], ['BUSINESSES_SEARCH']]
     },
@@ -53,13 +47,3 @@ export const businessQueries = defineService({
     }
   }
 })
-
-export const businessService: BusinessService = {
-  getAll: (p: Pagination) => businessQueries.useGetAllQuery(p),
-  getById: (id: string) => businessQueries.useGetByIdQuery(id),
-  search: (params: { query: string } & Pagination) => businessQueries.useSearchQuery(params),
-  store: () => businessQueries.useStoreMutation(),
-  create: () => businessQueries.useStoreMutation(),
-  update: () => businessQueries.useUpdateMutation(),
-  delete: () => businessQueries.useDeleteMutation()
-}

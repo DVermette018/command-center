@@ -144,7 +144,6 @@
             Cancel
           </UButton>
           <UButton
-            :loading="isAddingMember"
             :disabled="!newMember.userId || !newMember.role"
             @click="addTeamMember"
           >
@@ -185,7 +184,6 @@
             Cancel
           </UButton>
           <UButton
-            :loading="isUpdatingManager"
             :disabled="!newManagerId"
             @click="updateProjectManager"
           >
@@ -221,14 +219,20 @@ const toast = useToast()
 // State
 const showAddModal = ref(false)
 const showManagerModal = ref(false)
-const isAddingMember = ref(false)
-const isUpdatingManager = ref(false)
 const newMember = ref({ userId: '', role: '' })
 const newManagerId = ref('')
 
-// Data fetching
-const { data: teamMembers, isLoading: isLoadingTeam, refetch: refetchTeam } = api.projects.getTeamMembers({ projectId: props.projectId })
-const { data: usersData, isLoading: isLoadingUsers } = api.users.getAllByRoles({ 
+// Reactive queries
+const { 
+  data: teamMembers, 
+  isLoading: isLoadingTeam, 
+  refetch: refetchTeam 
+} = api.projects.useGetTeamMembersQuery(props.projectId)
+
+const { 
+  data: usersData, 
+  isLoading: isLoadingUsers 
+} = api.users.useGetAllByRolesQuery({ 
   pageIndex: 1, 
   pageSize: 100, 
   roles: ['PROJECT_MANAGER', 'DEVELOPER', 'DESIGNER'] 
@@ -306,13 +310,16 @@ const cancelAdd = () => {
   newMember.value = { userId: '', role: '' }
 }
 
+// Mutations with loading states
+const addTeamMemberMutation = api.projects.useAddTeamMemberMutation()
+const removeTeamMemberMutation = api.projects.useRemoveTeamMemberMutation()
+const updateProjectMutation = api.projects.useUpdateMutation()
+
 const addTeamMember = async () => {
   if (!newMember.value.userId || !newMember.value.role) return
 
-  isAddingMember.value = true
-
   try {
-    await api.projects.addTeamMember().mutateAsync({
+    await addTeamMemberMutation({
       projectId: props.projectId,
       userId: newMember.value.userId,
       role: newMember.value.role
@@ -326,7 +333,7 @@ const addTeamMember = async () => {
     })
 
     showAddModal.value = false
-    refetchTeam()
+    newMember.value = { userId: '', role: '' }
     emit('updated')
   } catch (error) {
     console.error('Failed to add team member:', error)
@@ -337,14 +344,12 @@ const addTeamMember = async () => {
       color: 'error',
       icon: 'i-lucide-x'
     })
-  } finally {
-    isAddingMember.value = false
   }
 }
 
 const removeTeamMember = async (member: ProjectTeamMemberDTO) => {
   try {
-    await api.projects.removeTeamMember().mutateAsync({
+    await removeTeamMemberMutation({
       projectId: props.projectId,
       userId: member.userId
     })
@@ -356,7 +361,6 @@ const removeTeamMember = async (member: ProjectTeamMemberDTO) => {
       icon: 'i-lucide-user-minus'
     })
 
-    refetchTeam()
     emit('updated')
   } catch (error) {
     console.error('Failed to remove team member:', error)
@@ -376,10 +380,8 @@ const updateProjectManager = async () => {
     return
   }
 
-  isUpdatingManager.value = true
-
   try {
-    await api.projects.update().mutateAsync({
+    await updateProjectMutation({
       id: props.projectId,
       projectManagerId: newManagerId.value
     })
@@ -402,8 +404,6 @@ const updateProjectManager = async () => {
       color: 'error',
       icon: 'i-lucide-x'
     })
-  } finally {
-    isUpdatingManager.value = false
   }
 }
 </script>

@@ -1,26 +1,26 @@
-import { type PlanService, planService } from '~/api/services/plans'
-import { type CustomerService, customerService } from '~/api/services/customers'
-import { type ProjectService, projectService } from '~/api/services/projects'
-import { type UserService, userService } from '~/api/services/users'
-import { type BusinessService, businessService } from '~/api/services/business'
-import { type QuestionService, questionService } from '~/api/services/questions'
+import * as Plans from '~/api/services/plans'
+import * as Customers from '~/api/services/customers'
+import * as Projects from '~/api/services/projects'
+import * as Users from '~/api/services/users'
+import * as Business from '~/api/services/business'
+import * as Questions from '~/api/services/questions'
 
 export interface Api {
-  plans: PlanService
-  customers: CustomerService
-  projects: ProjectService
-  users: UserService
-  business: BusinessService
-  questions: QuestionService
+  plans: any
+  customers: any
+  projects: any
+  users: any
+  business: any
+  questions: any
 }
 
 export const useApi = (): Api => {
   return {
-    plans: planService,
-    customers: customerService,
-    projects: projectService,
-    users: userService,
-    business: businessService,
-    questions: questionService
+    plans: Plans.registerService,
+    customers: Customers.registerService,
+    projects: Projects.registerService,
+    users: Users.registerService,
+    business: Business.registerService,
+    questions: Questions.registerService
   } satisfies Api
 }

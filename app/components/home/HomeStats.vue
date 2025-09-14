@@ -50,13 +50,10 @@ const baseStats: Stat[] = [
 
 const { data: stats } = await useAsyncData<Stat[]>('stats', async () => {
 
-  const { data: response } = api.customers.getPeriodVariationByStatus({
+  const { data: response } = api.customers.useGetPeriodVariationByStatusQuery({
     status: 'ACTIVE',
     period: props.period,
-    range: {
-      start: props.range.start instanceof Date ? props.range.start.toISOString() : props.range.start,
-      end: props.range.end instanceof Date ? props.range.end.toISOString() : props.range.end
-    }
+    range: props.range
   })
 
   // Map the response to the base stats structure

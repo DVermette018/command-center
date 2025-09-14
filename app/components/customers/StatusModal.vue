@@ -16,7 +16,7 @@ const emit = defineEmits<{
 const api = useApi()
 const toast = useToast()
 
-const updateStatusMutation = api.customers.updateStatus()
+const updateStatusMutation = api.customers.useUpdateStatusMutation()
 
 const open = computed({
   get: () => props.open,
@@ -229,9 +229,9 @@ watch(open, (newValue) => {
         />
         <UButton
           :color="isDowngrade ? 'warning' : 'primary'"
-          :disabled="!hasChanged || updateStatusMutation.isLoading"
-          :icon="updateStatusMutation.isLoading ? 'i-lucide-loader-2' : 'i-lucide-save'"
-          :label="updateStatusMutation.isLoading ? 'Guardando...' : 'Actualizar Estado'"
+          :disabled="!hasChanged || updateStatusMutation.isPending.value"
+          :icon="updateStatusMutation.isPending.value ? 'i-lucide-loader-2' : 'i-lucide-save'"
+          :label="updateStatusMutation.isPending.value ? 'Guardando...' : 'Actualizar Estado'"
           variant="solid"
           @click="onSubmit"
         />

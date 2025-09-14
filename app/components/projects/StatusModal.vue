@@ -28,7 +28,7 @@ const api = useApi()
 const toast = useToast()
 
 // Use the mutation hook for updating project status
-const updateStatusMutation = api.projects.updateStatus()
+const updateStatusMutation = api.projects.useUpdateStatusMutation()
 
 // Modal state
 const isOpen = ref(false)

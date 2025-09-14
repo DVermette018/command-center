@@ -9,9 +9,7 @@ const toast = useToast()
 const customerId = computed(() => route.params.id as string)
 
 // Fetch customer data
-const { data: customer, isLoading, error, refetch } = api.customers.getById({ 
-  id: customerId.value 
-})
+const { data: customer, isLoading, error, refetch } = api.customers.useGetByIdQuery(customerId.value)
 
 // Status change modal state
 const statusModalOpen = ref(false)
@@ -45,7 +43,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto">
+  <div >
     <!-- Loading State -->
     <div v-if="isLoading" class="space-y-6">
       <div class="animate-pulse">
@@ -83,7 +81,7 @@ definePageMeta({
             <UBadge
               :color="{
                 LEAD: 'blue',
-                PROSPECT: 'yellow', 
+                PROSPECT: 'yellow',
                 ACTIVE: 'green',
                 INACTIVE: 'gray',
                 CHURNED: 'red'
@@ -94,7 +92,7 @@ definePageMeta({
               {{ {
                 LEAD: 'Prospecto',
                 PROSPECT: 'Cliente Potencial',
-                ACTIVE: 'Cliente Activo', 
+                ACTIVE: 'Cliente Activo',
                 INACTIVE: 'Inactivo',
                 CHURNED: 'Perdido'
               }[customer.status] }}
@@ -104,10 +102,10 @@ definePageMeta({
             {{ customer.businessProfile?.legalName || customer.businessProfile?.businessName }}
           </p>
           <p class="text-sm text-gray-500">
-            Cliente desde {{ new Date(customer.createdAt).toLocaleDateString('es-MX', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            Cliente desde {{ new Date(customer.createdAt).toLocaleDateString('es-MX', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             }) }}
           </p>
         </div>
@@ -136,7 +134,7 @@ definePageMeta({
           :description="customer.status === 'ACTIVE' ? 'Cliente activo generando ingresos' : 'Estado del cliente en el pipeline'"
         >
           <template #icon>
-            <UIcon 
+            <UIcon
               :name="{
                 LEAD: 'i-lucide-user-plus',
                 PROSPECT: 'i-lucide-users',
@@ -218,10 +216,10 @@ definePageMeta({
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Sitio Web</label>
                   <p class="text-gray-900">
-                    <a 
-                      v-if="customer.businessProfile?.website" 
-                      :href="customer.businessProfile.website" 
-                      target="_blank" 
+                    <a
+                      v-if="customer.businessProfile?.website"
+                      :href="customer.businessProfile.website"
+                      target="_blank"
                       class="text-blue-600 hover:underline"
                     >
                       {{ customer.businessProfile.website }}
@@ -240,8 +238,8 @@ definePageMeta({
                     {{ customer.businessProfile.addresses[0].street2 }}
                   </p>
                   <p class="text-gray-700">
-                    {{ customer.businessProfile.addresses[0].city }}, 
-                    {{ customer.businessProfile.addresses[0].state }} 
+                    {{ customer.businessProfile.addresses[0].city }},
+                    {{ customer.businessProfile.addresses[0].state }}
                     {{ customer.businessProfile.addresses[0].zipCode }}
                   </p>
                   <p class="text-gray-700">{{ customer.businessProfile.addresses[0].country }}</p>
@@ -262,8 +260,8 @@ definePageMeta({
             description="Personas de contacto principales"
           >
             <div class="space-y-3">
-              <div 
-                v-for="contact in customer.contacts?.filter(c => c.isPrimary)" 
+              <div
+                v-for="contact in customer.contacts?.filter(c => c.isPrimary)"
                 :key="contact.id"
                 class="bg-gray-50 rounded-lg p-3"
               >
@@ -303,7 +301,7 @@ definePageMeta({
             :description="`Cliente adquirido vía ${customer.source}`"
           >
             <div class="flex items-center gap-2">
-              <UIcon 
+              <UIcon
                 :name="{
                   website: 'i-lucide-globe',
                   cold_visit: 'i-lucide-map-pin',
@@ -318,7 +316,7 @@ definePageMeta({
                   partner: 'i-lucide-handshake',
                   other: 'i-lucide-help-circle'
                 }[customer.source] || 'i-lucide-help-circle'"
-                class="text-blue-500" 
+                class="text-blue-500"
               />
               <span class="capitalize">{{ customer.source.replace('_', ' ') }}</span>
             </div>

@@ -103,6 +103,7 @@ export const registerRoutes = () => ({
         })
       }
 
+
       // Generate prompt using AI (this is a placeholder - implement your AI logic)
       const prompt = await generateLovablePrompt(answers, project)
 
@@ -128,8 +129,8 @@ export const registerRoutes = () => ({
 async function generateLovablePrompt(answers: any[], project: any): Promise<string> {
   // Structure answers by question code
   const structuredAnswers = answers.reduce((acc, item) => {
-    if (item.question?.code) {
-      acc[item.question.code] = item.answer
+    if (item.questionCode) {
+      acc[item.questionCode] = item.answer
     }
     return acc
   }, {} as Record<string, any>)

@@ -17,7 +17,7 @@ const toast = useToast()
 const open = ref(false)
 
 // Use the mutation hook for creating projects
-const createProjectMutation = api.projects.create()
+const createProjectMutation = api.projects.useStoreMutation()
 
 // Form state matching the Project model
 const state = reactive<CreateProjectDTO>({
@@ -63,7 +63,7 @@ const targetEndDateCalendar = computed({
 const projectManagers = ref<SelectOption[]>([])
 
 // Use query hook for loading users
-const { data: usersData, error: usersError } = api.users.getAllByRoles({ 
+const { data: usersData, error: usersError } = api.users.useGetAllByRolesQuery({ 
   pageIndex: 1, 
   pageSize: 100, 
   roles: ['PROJECT_MANAGER', 'DEVELOPER', 'DESIGNER'] 

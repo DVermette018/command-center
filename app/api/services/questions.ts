@@ -10,21 +10,12 @@ import type {
 
 const trpc = () => useNuxtApp().$trpc
 
-export interface QuestionService {
-  getTemplatesForPlan: (planType: PlanType) => Promise<ListQuestionTemplateDTO[]>
-  getProjectAnswers: (projectId: string) => Promise<ListAnswerDTO[]>
-  getLastCompletedSection: (projectId: string) => Promise<number>
-  getProjectProgress: (projectId: string) => Promise<ProjectSetupProgressDTO | null>
-  saveDraft: (data: SaveDraftDTO) => Promise<{ success: boolean; }>
-  saveAnswers: (data: SaveAnswersDTO) => Promise<{ success: boolean; }>
-  generateAIPrompt: (projectId: string) => Promise<{ prompt: string; version: number }>
-}
 
-export const questionsQueries = defineService({
+export const registerService = defineService({
   queries: {
     getTemplatesForPlan: {
       queryKey: (planType: PlanType) => ['QUESTIONS_GET_TEMPLATES_FOR_PLAN', planType],
-      queryFn: (planType: PlanType) => trpc().questions.getTemplatesForPlan.query({ planType }),
+      queryFn: async (planType: PlanType) => await trpc().questions.getTemplatesForPlan.query({ planType }),
     },
     getProjectAnswers: {
       queryKey: (projectId: string) => ['QUESTIONS_GET_PROJECT_ANSWERS', projectId],
@@ -54,13 +45,3 @@ export const questionsQueries = defineService({
     }
   }
 })
-
-export const questionService: QuestionService = {
-  getTemplatesForPlan: (planType: PlanType) => questionsQueries.getTemplatesForPlan(planType),
-  getProjectAnswers: (projectId: string) => questionsQueries.getProjectAnswers(projectId),
-  getLastCompletedSection: (projectId: string) => questionsQueries.getLastCompletedSection(projectId),
-  getProjectProgress: (projectId: string) => questionsQueries.getProjectProgress(projectId),
-  saveDraft: (data: SaveDraftDTO) => questionsQueries.callSaveDraft()(data),
-  saveAnswers: (data: SaveAnswersDTO) => questionsQueries.callSaveAnswers()(data),
-  generateAIPrompt: (projectId: string) => questionsQueries.callGenerateAIPrompt()(projectId)
-}

@@ -33,7 +33,7 @@ const paginationParams = reactive({
   pageSize: 10
 })
 
-const { data, isLoading, status, error, refetch } = api.projects.getAll(paginationParams)
+const { data, isLoading, status, error, refetch } = api.projects.useGetAllQuery(paginationParams)
 
 const selectedRowsCount = computed((): number => {
   return table.value?.tableApi?.getFilteredSelectedRowModel().rows.length || 0
