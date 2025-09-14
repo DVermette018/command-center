@@ -548,10 +548,10 @@ Update this after each test file:
 - [ ] `/server/api/trpc/routers/questions.test.ts`
 
 ### Components (Priority)
-- [ ] `/app/components/customers/Table.test.ts`
-- [ ] `/app/components/projects/Table.test.ts`
-- [ ] `/app/components/customers/AddModal.test.ts`
-- [ ] `/app/components/projects/AddModal.test.ts`
+- [ ] `/app/components/customers/Table.pending-test.ts`
+- [ ] `/app/components/projects/Table.pending-test.ts`
+- [ ] `/app/components/customers/AddModal.pending-test.ts`
+- [ ] `/app/components/projects/AddModal.pending-test.ts`
 - [ ] (more to be added)
 
 Total: 0/40+ files

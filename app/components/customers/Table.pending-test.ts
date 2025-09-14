@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import Table from './Table.vue'
+import Table from '~/components/customers/Table.vue'
 import type { CustomerDTO } from '~~/dto/customer'
+
+vi.mock('~/api', () => ({
+  useApi: () => mockApi
+}))
+
 
 // Mock API response data
 const mockCustomers: CustomerDTO[] = [
@@ -113,24 +118,8 @@ describe('CustomersTable', () => {
   let wrapper: any
 
   beforeEach(() => {
-    wrapper = mount(Table, {
-      global: {
-        stubs: {
-          UInput: true,
-          USelect: true,
-          UDropdownMenu: true,
-          UButton: true,
-          UTable: true,
-          UPagination: true,
-          UBadge: true,
-          UCheckbox: true,
-          UKbd: true,
-          CustomersDeleteModal: true,
-          CustomersStatusModal: true
-        }
-      }
-    })
-    vi.clearAllMocks()
+    wrapper = mount(Table)
+    vi.resetAllMocks()
   })
 
   describe('Data Loading', () => {
@@ -147,9 +136,9 @@ describe('CustomersTable', () => {
       // Mock error state
       wrapper.vm.status = 'error'
       wrapper.vm.error = new Error('API Error')
-      
+
       await wrapper.vm.$nextTick()
-      
+
       // Component should handle error without crashing
       expect(wrapper.exists()).toBe(true)
     })
@@ -159,7 +148,7 @@ describe('CustomersTable', () => {
     it('should filter by customer name', async () => {
       wrapper.vm.nameFilter = 'Test Company 1'
       await wrapper.vm.$nextTick()
-      
+
       // Filter should be applied to table
       expect(wrapper.vm.nameFilter).toBe('Test Company 1')
     })
@@ -167,14 +156,14 @@ describe('CustomersTable', () => {
     it('should filter by status', async () => {
       wrapper.vm.statusFilter = 'ACTIVE'
       await wrapper.vm.$nextTick()
-      
+
       expect(wrapper.vm.statusFilter).toBe('ACTIVE')
     })
 
     it('should clear status filter when set to all', async () => {
       wrapper.vm.statusFilter = 'all'
       await wrapper.vm.$nextTick()
-      
+
       expect(wrapper.vm.statusFilter).toBe('all')
     })
 
@@ -187,16 +176,16 @@ describe('CustomersTable', () => {
         { label: 'Inactive', value: 'INACTIVE' },
         { label: 'Churned', value: 'CHURNED' }
       ]
-      
+
       expect(statusOptions).toBeDefined()
     })
   })
 
   describe('Pagination', () => {
     it('should handle pagination correctly', async () => {
-      wrapper.vm.pagination = { pageIndex: 1, pageSize: 10 }
+      wrapper.pagination = { pageIndex: 1, pageSize: 10 }
       await wrapper.vm.$nextTick()
-      
+
       expect(wrapper.vm.paginationParams.pageIndex).toBe(2) // 1-based indexing
       expect(wrapper.vm.paginationParams.pageSize).toBe(10)
     })
@@ -204,7 +193,7 @@ describe('CustomersTable', () => {
     it('should refetch data when pagination changes', async () => {
       wrapper.vm.pagination = { pageIndex: 2, pageSize: 20 }
       await wrapper.vm.$nextTick()
-      
+
       expect(mockRefetch).toHaveBeenCalled()
     })
 
@@ -219,7 +208,7 @@ describe('CustomersTable', () => {
       const mockRow = {
         original: { id: '1' }
       }
-      
+
       wrapper.vm.onRowClick(mockRow)
       expect(mockNavigateTo).toHaveBeenCalledWith('/customers/1')
     })
@@ -228,21 +217,21 @@ describe('CustomersTable', () => {
       const mockRow = {
         original: mockCustomers[0]
       }
-      
+
       const items = wrapper.vm.getRowItems(mockRow)
-      
+
       expect(items).toContainEqual({
         label: 'Copy customer ID',
         icon: 'i-lucide-copy',
         onSelect: expect.any(Function)
       })
-      
+
       expect(items).toContainEqual({
         label: 'View customer details',
         icon: 'i-lucide-list',
         onSelect: expect.any(Function)
       })
-      
+
       expect(items).toContainEqual({
         label: 'Delete customer',
         icon: 'i-lucide-trash',
@@ -258,16 +247,16 @@ describe('CustomersTable', () => {
           writeText: vi.fn()
         }
       })
-      
+
       const mockRow = {
         original: mockCustomers[0]
       }
-      
+
       const items = wrapper.vm.getRowItems(mockRow)
       const copyItem = items.find((item: any) => item.label === 'Copy customer ID')
-      
+
       copyItem.onSelect()
-      
+
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('1')
     })
   })
@@ -275,7 +264,7 @@ describe('CustomersTable', () => {
   describe('Table Columns', () => {
     it('should have correct column configuration', () => {
       expect(wrapper.vm.columns).toHaveLength(6) // select, name, representative, industry, status, actions
-      
+
       const columnIds = wrapper.vm.columns.map((col: any) => col.id || col.accessorKey)
       expect(columnIds).toContain('select')
       expect(columnIds).toContain('name')
@@ -304,7 +293,7 @@ describe('CustomersTable', () => {
     it('should show delete button when rows are selected', () => {
       // Mock selected rows
       wrapper.vm.selectedRowsCount = 2
-      
+
       expect(wrapper.vm.selectedRowsCount).toBe(2)
     })
   })

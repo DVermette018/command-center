@@ -1,12 +1,14 @@
 import { defineConfig } from 'vitest/config'
 import { resolve } from 'path'
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
+  plugins: [vue()],
   resolve: {
     alias: {
-      '~': resolve(__dirname, '.'),
+      '~': resolve(__dirname, './app'),
       '~~': resolve(__dirname, '.'),
-      '@': resolve(__dirname, '.'),
+      '@': resolve(__dirname, './app'),
       '~~/': resolve(__dirname, './'),
       '@@/': resolve(__dirname, './')
     }
@@ -15,6 +17,7 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['./test/setup.ts'],
+    exclude: ['node_modules', 'dist', 'test/e2e', 'prisma', '.conductor/**'],
     isolate: true,
     coverage: {
       provider: 'v8',

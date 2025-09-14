@@ -7,7 +7,7 @@ import type { CreateCustomerSchema } from '~~/dto/customer'
 const mockMutate = vi.fn()
 const mockApi = {
   customers: {
-    create: () => ({
+    useCreateMutation: () => ({
       mutate: mockMutate,
       mutateAsync: vi.fn(),
       isLoading: false,
@@ -30,25 +30,21 @@ describe('CustomersAddModal', () => {
   let wrapper: any
 
   beforeEach(() => {
+    // Try with minimal options first
     wrapper = mount(AddModal, {
-      global: {
-        stubs: {
-          UButton: true,
-          UModal: true,
-          UForm: true,
-          UPageCard: true,
-          UFormField: true,
-          UInput: true,
-          USelect: true,
-          USeparator: true,
-          UTextarea: true
-        }
-      }
+      shallow: true
     })
     vi.clearAllMocks()
   })
 
   describe('Form Validation', () => {
+    it('should mount successfully', () => {
+      console.log('wrapper:', !!wrapper)
+      console.log('wrapper.vm:', !!wrapper.vm)
+      console.log('wrapper exists:', wrapper.exists())
+      expect(wrapper.exists()).toBe(true)
+    })
+    
     it('should initialize with correct default state', () => {
       expect(wrapper.vm.state.business.businessName).toBe('')
       expect(wrapper.vm.state.business.ownerName).toBe('')

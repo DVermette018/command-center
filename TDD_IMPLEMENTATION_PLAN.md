@@ -450,7 +450,7 @@ describe('plans router', () => {
 
 #### 22. Component Testing Pattern
 **Example: `/app/components/customers/Table.vue`**
-**Test File:** `/app/components/customers/Table.test.ts`
+**Test File:** `/app/components/customers/Table.pending-test.ts`
 
 **Test Plan:**
 ```typescript
