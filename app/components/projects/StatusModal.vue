@@ -166,7 +166,8 @@ const updateStatus = () => {
           <UTextarea
             v-model="reason"
             :placeholder="reasonRequired ? 'Please provide a reason for this status change' : 'Optional: Provide context for this change'"
-            rows="3"
+            class="w-full"
+            :rows="3"
           />
         </UFormField>
 
@@ -200,7 +201,6 @@ const updateStatus = () => {
         </UButton>
         <UButton
           :disabled="!selectedStatus || (reasonRequired && !reason.trim())"
-          :loading="updateStatusMutation.isPending.value"
           @click="updateStatus"
         >
           Update Status

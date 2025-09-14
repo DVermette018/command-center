@@ -2,7 +2,7 @@ import type { PrismaClient } from '@prisma/client'
 import type { Pagination } from '~~/types/common'
 import type { PaginatedResponse } from '~~/types/api'
 import type { CreateProjectDTO, ProjectDTO, ProjectListDTO, UpdateProjectDTO, CreateProjectTeamMemberDTO, ProjectTeamMemberDTO } from '~~/dto/project'
-import type { Project } from '~~/types/project'
+import type { Project, ProjectStatus } from '~~/types/project'
 import { prismaToDTO } from '~~/utils/prisma-mappers'
 
 // projects
@@ -145,7 +145,7 @@ export const register = (db: PrismaClient) => ({
         description: p.description ?? undefined,
         type: p.type,
         status: p.status,
-        phase: 'DISCOVERY',
+        phase: p.phase,
         priority: p.priority,
 
         startDate: p.startDate ? p.startDate.toISOString() : undefined,
@@ -255,7 +255,7 @@ export const register = (db: PrismaClient) => ({
   update: async (updateData: UpdateProjectDTO): Promise<ProjectDTO> => {
     try {
       const { id, ...data } = updateData
-      
+
       const p = await db.project.update({
         where: { id },
         data: {
@@ -330,7 +330,7 @@ export const register = (db: PrismaClient) => ({
     }
   },
 
-  updateStatus: async (statusData: { id: string; status: string; reason?: string }): Promise<ProjectDTO> => {
+  updateStatus: async (statusData: { id: string; status: ProjectStatus; reason?: string }): Promise<ProjectDTO> => {
     try {
       const p = await db.project.update({
         where: { id: statusData.id },

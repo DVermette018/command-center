@@ -1,6 +1,7 @@
 import { defineService } from '~/api/services/helpers'
 import type { Pagination } from '~~/types/common'
 import { type CreateProjectDTO, type CreateProjectTeamMemberDTO, type UpdateProjectDTO } from '~~/dto/project'
+import type { ProjectPhase } from '~~/types/project'
 
 const trpc = () => useNuxtApp().$trpc
 
@@ -43,7 +44,7 @@ export const registerService = defineService({
     updatePhase: {
       request: (payload: {
         id: string;
-        phase: 'DISCOVERY' | 'PLANNING' | 'DESIGN' | 'DEVELOPMENT' | 'REVIEW' | 'TESTING' | 'LAUNCH' | 'POST_LAUNCH' | 'MAINTENANCE';
+        phase: ProjectPhase;
         notes?: string
       }) => trpc().projects.updatePhase.mutate(payload),
       cacheKey: (payload) => [['PROJECTS_GET_ALL'], ['PROJECTS_DETAIL', payload.id], ['PROJECT_PHASE_HISTORY', payload.id]]

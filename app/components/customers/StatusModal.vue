@@ -36,25 +36,25 @@ const statusOptions = [
   { label: 'Perdido', value: 'CHURNED', color: 'error' as const, description: 'Cliente que dejó de usar nuestros servicios' }
 ]
 
-const currentStatus = computed(() => 
+const currentStatus = computed(() =>
   statusOptions.find(option => option.value === props.customer.status)
 )
 
-const newStatus = computed(() => 
+const newStatus = computed(() =>
   statusOptions.find(option => option.value === state.status)
 )
 
-const hasChanged = computed(() => 
+const hasChanged = computed(() =>
   state.status !== props.customer.status
 )
 
 const isDowngrade = computed(() => {
   const statusPriority = { 'LEAD': 1, 'PROSPECT': 2, 'ACTIVE': 3, 'INACTIVE': 2, 'CHURNED': 0 }
-  return statusPriority[state.status as keyof typeof statusPriority] < 
+  return statusPriority[state.status as keyof typeof statusPriority] <
          statusPriority[props.customer.status as keyof typeof statusPriority]
 })
 
-const requiresReason = computed(() => 
+const requiresReason = computed(() =>
   isDowngrade.value || state.status === 'CHURNED' || state.status === 'INACTIVE'
 )
 
@@ -133,8 +133,8 @@ watch(open, (newValue) => {
             <div>
               <p class="text-sm font-medium text-gray-700">Estado Actual</p>
               <div class="flex items-center gap-2 mt-1">
-                <UBadge 
-                  :color="currentStatus?.color" 
+                <UBadge
+                  :color="currentStatus?.color"
                   variant="subtle"
                 >
                   {{ currentStatus?.label }}
@@ -162,8 +162,8 @@ watch(open, (newValue) => {
           >
             <template #option="{ option }: { option: { label: string; value: string; description: string } }">
               <div class="flex items-center gap-3">
-                <UBadge 
-                  :color="statusOptions.find(s => s.value === option.value)?.color" 
+                <UBadge
+                  :color="statusOptions.find(s => s.value === option.value)?.color"
                   variant="subtle"
                   size="sm"
                 >
@@ -176,15 +176,15 @@ watch(open, (newValue) => {
         </UFormField>
 
         <!-- Preview New Status -->
-        <div 
-          v-if="hasChanged" 
+        <div
+          v-if="hasChanged"
           class="rounded-lg border border-green-200 bg-green-50 p-4"
         >
           <div class="flex items-center gap-2">
             <UIcon name="i-lucide-arrow-right" class="text-green-600" />
             <p class="text-sm font-medium text-green-800">Cambio a:</p>
-            <UBadge 
-              :color="newStatus?.color" 
+            <UBadge
+              :color="newStatus?.color"
               variant="subtle"
             >
               {{ newStatus?.label }}
@@ -229,9 +229,9 @@ watch(open, (newValue) => {
         />
         <UButton
           :color="isDowngrade ? 'warning' : 'primary'"
-          :disabled="!hasChanged || updateStatusMutation.isPending.value"
-          :icon="updateStatusMutation.isPending.value ? 'i-lucide-loader-2' : 'i-lucide-save'"
-          :label="updateStatusMutation.isPending.value ? 'Guardando...' : 'Actualizar Estado'"
+          :disabled="!hasChanged"
+          icon="i-lucide-save"
+          label="Actualizar Estado"
           variant="solid"
           @click="onSubmit"
         />

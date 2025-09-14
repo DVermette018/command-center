@@ -41,7 +41,7 @@ const links = [[{
 const api = useApi()
 
 // Fetch project data
-const { data: project, status, refetch } = api.projects.useGetByIdQuery(projectId)
+const { data: project, status } = api.projects.useGetByIdQuery(projectId)
 
 // Current tab state
 const currentTab = computed(() => {
@@ -50,11 +50,6 @@ const currentTab = computed(() => {
   if (path.includes('/setup')) return 'setup'
   return 'overview'
 })
-
-// Handle project updates
-const handleProjectUpdate = () => {
-  refetch()
-}
 
 // Handle errors appropriately
 if (status.value === 'error') {
@@ -95,7 +90,6 @@ if (status.value === 'error') {
         <ProjectsProjectOverview
           v-if="currentTab === 'overview'"
           :project="project"
-          @updated="handleProjectUpdate"
         />
 
         <!-- Team Tab -->
@@ -103,7 +97,6 @@ if (status.value === 'error') {
           v-else-if="currentTab === 'team'"
           :project-id="projectId"
           :project="project"
-          @updated="handleProjectUpdate"
         />
 
         <!-- Setup Tab (existing functionality) -->

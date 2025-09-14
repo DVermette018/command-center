@@ -39,6 +39,7 @@
         <UTextarea
           v-model="notes"
           placeholder="Add any notes about this phase change..."
+          class="w-full"
           :rows="3"
         />
       </UFormField>
@@ -83,7 +84,6 @@
           Cancel
         </UButton>
         <UButton
-          :loading="updatePhaseMutation.isPending.value"
           :disabled="!selectedPhase"
           @click="updatePhase"
         >
@@ -97,6 +97,7 @@
 <script lang="ts" setup>
 import type { ProjectPhase } from '~~/types/project'
 import { useApi } from '~/api'
+import { useQueryClient, useMutation } from '@tanstack/vue-query'
 
 interface Props {
   projectId: string
@@ -123,7 +124,6 @@ const emit = defineEmits<Emits>()
 const api = useApi()
 const toast = useToast()
 
-// Use the mutation hook for updating project phase
 const updatePhaseMutation = api.projects.useUpdatePhaseMutation()
 
 // Modal state

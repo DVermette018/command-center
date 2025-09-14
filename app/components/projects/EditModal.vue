@@ -28,7 +28,7 @@
         <!-- Basic Information -->
         <div class="space-y-4">
           <h3 class="text-lg font-medium">Basic Information</h3>
-          
+
           <UFormField
             label="Project Name"
             name="name"
@@ -36,6 +36,7 @@
           >
             <UInput
               v-model="state.name"
+              class="w-full"
               placeholder="Enter project name"
             />
           </UFormField>
@@ -47,6 +48,7 @@
             <UTextarea
               v-model="state.description"
               placeholder="Describe the project"
+              class="w-full"
               :rows="3"
             />
           </UFormField>
@@ -58,6 +60,7 @@
             <USelect
               v-model="state.type"
               :items="projectTypeOptions"
+              class="w-full"
               placeholder="Select project type"
             />
           </UFormField>
@@ -70,6 +73,7 @@
               v-model="state.priority"
               :items="priorityOptions"
               placeholder="Select priority"
+              class="w-full"
             />
           </UFormField>
         </div>
@@ -77,12 +81,12 @@
         <!-- Timeline -->
         <div class="space-y-4">
           <h3 class="text-lg font-medium">Timeline</h3>
-          
+
           <UFormField
             label="Start Date"
             name="startDate"
           >
-            <DatePicker 
+            <DatePicker
               v-model="startDateCalendar"
               class="w-full"
             />
@@ -93,7 +97,7 @@
             name="targetEndDate"
             :error="!validateDates ? 'Target date must be after start date' : undefined"
           >
-            <DatePicker 
+            <DatePicker
               v-model="targetEndDateCalendar"
               class="w-full"
             />
@@ -103,7 +107,7 @@
             label="Actual End Date"
             name="actualEndDate"
           >
-            <DatePicker 
+            <DatePicker
               v-model="actualEndDateCalendar"
               class="w-full"
             />
@@ -113,7 +117,7 @@
         <!-- Budget -->
         <div class="space-y-4">
           <h3 class="text-lg font-medium">Budget</h3>
-          
+
           <div class="grid grid-cols-2 gap-4">
             <UFormField
               label="Budget Amount"
@@ -154,7 +158,6 @@
           Cancel
         </UButton>
         <UButton
-          :loading="updateProjectMutation.isPending.value"
           form="edit-project-form"
           type="submit"
         >
@@ -353,7 +356,7 @@ const onSubmit = (event: FormSubmitEvent<UpdateProjectDTO>) => {
   updateProjectMutation.mutate(event.data, {
     onSuccess: () => {
       emit('success')
-      
+
       toast.add({
         title: 'Project Updated',
         description: 'Project information has been updated successfully',
@@ -365,7 +368,7 @@ const onSubmit = (event: FormSubmitEvent<UpdateProjectDTO>) => {
     },
     onError: (error: any) => {
       console.error('Failed to update project:', error)
-      
+
       toast.add({
         title: 'Update Failed',
         description: error instanceof Error ? error.message : 'Failed to update project',
