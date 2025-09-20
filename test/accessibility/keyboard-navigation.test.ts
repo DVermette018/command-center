@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { flushPromises } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
+import { defineComponent, ref } from 'vue'
 import userEvent from '@testing-library/user-event'
 import CustomerAddModal from '../../app/components/customers/AddModal.vue'
 import ProjectAddModal from '../../app/components/projects/AddModal.vue'
@@ -67,21 +67,21 @@ const KeyboardNavigationTestApp = defineComponent({
     <div data-testid="keyboard-nav-app">
       <!-- Navigation Header -->
       <nav data-testid="main-nav" role="navigation" aria-label="Main navigation">
-        <button 
+        <button
           data-testid="nav-dashboard"
           @click="$router?.push('/')"
           aria-label="Go to dashboard"
         >
           Dashboard
         </button>
-        <button 
+        <button
           data-testid="nav-customers"
           @click="$router?.push('/customers')"
           aria-label="Go to customers"
         >
           Customers
         </button>
-        <button 
+        <button
           data-testid="nav-projects"
           @click="$router?.push('/projects')"
           aria-label="Go to projects"
@@ -92,14 +92,14 @@ const KeyboardNavigationTestApp = defineComponent({
 
       <!-- Action Buttons -->
       <div data-testid="action-buttons" class="mb-4">
-        <button 
+        <button
           data-testid="open-customer-modal"
           @click="showCustomerModal = true"
           aria-label="Add new customer"
         >
           Add Customer
         </button>
-        <button 
+        <button
           data-testid="open-project-modal"
           @click="showProjectModal = true"
           aria-label="Add new project"
@@ -111,7 +111,7 @@ const KeyboardNavigationTestApp = defineComponent({
       <!-- Customer Table -->
       <div data-testid="customer-section">
         <h2 id="customers-heading">Customer Management</h2>
-        <CustomerTable 
+        <CustomerTable
           :customers="customers"
           aria-labelledby="customers-heading"
           data-testid="customer-table"
@@ -124,7 +124,7 @@ const KeyboardNavigationTestApp = defineComponent({
         @close="showCustomerModal = false"
         data-testid="customer-modal"
       />
-      
+
       <ProjectAddModal
         v-if="showProjectModal"
         customer-id="1"
@@ -205,7 +205,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
       await flushPromises()
 
       expect(wrapper.vm.showCustomerModal).toBe(true)
-      
+
       // Modal should receive focus
       const modal = wrapper.find('[data-testid="customer-modal"]')
       expect(modal.exists()).toBe(true)
@@ -220,7 +220,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
     it('returns focus to triggering element after modal closes', async () => {
       const openModalButton = wrapper.find('[data-testid="open-customer-modal"]')
-      
+
       // Focus and open modal
       openModalButton.element.focus()
       await openModalButton.trigger('click')
@@ -240,14 +240,14 @@ describe('Keyboard Navigation Accessibility Tests', () => {
   describe('Keyboard Event Handling', () => {
     it('activates buttons with Enter and Space keys', async () => {
       const button = wrapper.find('[data-testid="open-customer-modal"]')
-      
+
       // Test Enter key
       button.element.focus()
       await simulateKeyPress(wrapper, 'Enter')
       await flushPromises()
 
       expect(wrapper.vm.showCustomerModal).toBe(true)
-      
+
       // Close modal and test Space key
       wrapper.vm.showCustomerModal = false
       await flushPromises()
@@ -321,14 +321,14 @@ describe('Keyboard Navigation Accessibility Tests', () => {
   describe('Focus Management', () => {
     it('provides visible focus indicators', async () => {
       const buttons = wrapper.findAll('button')
-      
+
       for (const button of buttons) {
         button.element.focus()
         await flushPromises()
 
         // Check that focus is visible (implementation dependent)
         expect(document.activeElement).toBe(button.element)
-        
+
         // In a real implementation, you would check for focus styles
         // expect(button.classes()).toContain('focus:ring') or similar
       }
@@ -337,7 +337,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
     it('maintains focus state during dynamic content changes', async () => {
       const openModalButton = wrapper.find('[data-testid="open-customer-modal"]')
       openModalButton.element.focus()
-      
+
       // Open modal (content change)
       await openModalButton.trigger('click')
       await flushPromises()
@@ -360,7 +360,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
       })
 
       const testWrapper = mount(TestComponent)
-      
+
       const enabled1 = testWrapper.find('[data-testid="enabled-1"]')
       const disabled = testWrapper.find('[data-testid="disabled"]')
       const enabled2 = testWrapper.find('[data-testid="enabled-2"]')
@@ -404,7 +404,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
       // Test focus within nested form components
       const formFields = modal.findAll('input, select')
-      
+
       if (formFields.length > 0) {
         formFields[0].element.focus()
         expect(document.activeElement).toBe(formFields[0].element)
@@ -414,7 +414,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
     it('maintains keyboard navigation during loading states', async () => {
       // Test that keyboard navigation still works during async operations
       const actionButton = wrapper.find('[data-testid="open-customer-modal"]')
-      
+
       actionButton.element.focus()
       await actionButton.trigger('click')
       await flushPromises()
@@ -426,7 +426,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
     it('handles keyboard shortcuts and access keys', async () => {
       // Test common keyboard shortcuts
       // Alt+C for customers, Alt+P for projects, etc.
-      
+
       await simulateKeyPress(wrapper, 'c', { altKey: true })
       await flushPromises()
 
@@ -438,10 +438,10 @@ describe('Keyboard Navigation Accessibility Tests', () => {
     it('provides keyboard alternatives for mouse-only interactions', async () => {
       // Ensure all mouse interactions have keyboard alternatives
       const customerTable = wrapper.findComponent(CustomerTable)
-      
+
       // Table should be navigable via keyboard
       expect(customerTable.exists()).toBe(true)
-      
+
       // Context menus, drag/drop, etc. should have keyboard alternatives
       // This would be implementation-specific testing
     })
@@ -463,7 +463,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
     it('provides focus indicators with sufficient contrast', async () => {
       const focusableElements = wrapper.findAll('button')
-      
+
       for (const element of focusableElements) {
         element.element.focus()
         await flushPromises()
@@ -477,12 +477,12 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
     it('supports keyboard-only navigation without mouse', async () => {
       // Test complete user journeys using only keyboard
-      
+
       // Navigate to customer management
       const customersButton = wrapper.find('[data-testid="nav-customers"]')
       customersButton.element.focus()
       await simulateKeyPress(wrapper, 'Enter')
-      
+
       // Open add customer modal
       const addCustomerButton = wrapper.find('[data-testid="open-customer-modal"]')
       await simulateKeyPress(wrapper, 'Tab') // Navigate to button
@@ -518,7 +518,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
 
     it('handles rapid keyboard input gracefully', async () => {
       const button = wrapper.find('[data-testid="open-customer-modal"]')
-      
+
       // Rapid key presses
       button.element.focus()
       for (let i = 0; i < 10; i++) {
@@ -533,7 +533,7 @@ describe('Keyboard Navigation Accessibility Tests', () => {
     it('preserves focus during route changes', async () => {
       const projectsButton = wrapper.find('[data-testid="nav-projects"]')
       projectsButton.element.focus()
-      
+
       // Simulate route change
       await projectsButton.trigger('click')
       await flushPromises()

@@ -1,27 +1,27 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { createMockProject, createMockUser } from '~/test/factories'
-import { mockApiResponse } from '~/test/utils'
-import ProjectsTable from '~/app/components/projects/Table.vue'
+import { createMockProject, createMockUser } from '../../factories'
+import { mockApiResponse } from '../../utils'
+import ProjectsTable from '~/components/projects/Table.vue'
 
 // Mocks
 const mockProjects = [
-  createMockProject({ 
-    name: 'Marketing Website', 
+  createMockProject({
+    name: 'Marketing Website',
     type: 'WEBSITE',
     status: 'ACTIVE',
-    projectManager: createMockUser({ 
-      firstName: 'John', 
-      lastName: 'Doe' 
+    projectManager: createMockUser({
+      firstName: 'John',
+      lastName: 'Doe'
     })
   }),
-  createMockProject({ 
-    name: 'Branding Project', 
+  createMockProject({
+    name: 'Branding Project',
     type: 'BRANDING',
     status: 'DRAFT',
-    projectManager: createMockUser({ 
-      firstName: 'Jane', 
-      lastName: 'Smith' 
+    projectManager: createMockUser({
+      firstName: 'Jane',
+      lastName: 'Smith'
     })
   })
 ]
@@ -29,9 +29,9 @@ const mockProjects = [
 const mockApiClient = {
   projects: {
     getAll: vi.fn().mockImplementation(() => ({
-      data: { 
-        data: mockProjects, 
-        pagination: { total: 2 } 
+      data: {
+        data: mockProjects,
+        pagination: { total: 2 }
       },
       isLoading: ref(false),
       status: ref('success'),
@@ -205,7 +205,7 @@ describe('ProjectsTable', () => {
 
     const rows = wrapper.findAll('tr')
     expect(rows.length).toBeGreaterThan(0)
-    
+
     // First row should be navigable
     await rows[0].trigger('keydown.enter')
     expect(wrapper.emitted('select')).toBeTruthy()
@@ -217,7 +217,7 @@ describe('ProjectsTable', () => {
 
     const statusBadges = wrapper.findAll('div[class*="badge"]')
     expect(statusBadges.length).toBeGreaterThan(0)
-    
+
     const firstBadge = statusBadges[0]
     expect(firstBadge.text().toLowerCase()).toContain('active')
   })

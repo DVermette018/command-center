@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
-import DeleteModal from '~/app/components/customers/DeleteModal.vue'
+import DeleteModal from '~/components/customers/DeleteModal.vue'
 
 describe('CustomersDeleteModal', () => {
   let wrapper: ReturnType<typeof mount>

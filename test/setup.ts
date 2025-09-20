@@ -65,6 +65,8 @@ beforeAll(() => {
 
   // Mock fetch globally
   global.fetch = vi.fn()
+  global.$fetch = vi.fn()
+  global.useFetch = vi.fn()
 })
 
 beforeEach(() => {
@@ -120,13 +122,17 @@ global.useToast = vi.fn(() => ({
 }))
 
 // Add back core Vue reactivity function mocks (component likely needs these)
-global.ref = vi.fn((value) => ({ 
-  value,
-  _rawValue: value,
-  _shallow: false,
-  __v_isRef: true,
-  __v_isShallow: false
-}))
+global.ref = vi.fn((initialValue) => {
+  let _value = initialValue
+  return {
+    get value() { return _value },
+    set value(newValue) { _value = newValue },
+    _rawValue: initialValue,
+    _shallow: false,
+    __v_isRef: true,
+    __v_isShallow: false
+  }
+})
 
 global.reactive = vi.fn((obj) => new Proxy(obj || {}, {
   get: (target, prop) => target[prop],
@@ -150,6 +156,10 @@ global.onMounted = vi.fn()
 global.onUnmounted = vi.fn()
 global.onBeforeMount = vi.fn()
 global.onBeforeUnmount = vi.fn()
+global.resolveComponent = vi.fn((name) => name)
+global.getCurrentInstance = vi.fn(() => null)
+global.inject = vi.fn()
+global.provide = vi.fn()
 
 // Mock the critical missing function that causes qupdate error
 global.queuePostFlushCb = vi.fn()
@@ -162,6 +172,30 @@ global.useNuxtApp = vi.fn(() => ({
   $trpc: vi.fn()
 }))
 global.navigateTo = vi.fn()
+
+// Mock Vue Router composables - these need to be globals for the composable to access them
+global.useRoute = vi.fn(() => ({
+  params: {},
+  query: {},
+  path: '/',
+  fullPath: '/',
+  hash: '',
+  matched: [],
+  meta: {},
+  name: 'index',
+  redirectedFrom: undefined
+}))
+
+global.useRouter = vi.fn(() => ({
+  push: vi.fn(),
+  replace: vi.fn(),
+  go: vi.fn(),
+  back: vi.fn(),
+  forward: vi.fn()
+}))
+
+// Mock Nuxt/Vue specific utilities
+global.defineShortcuts = vi.fn()
 
 // Mock tRPC client
 vi.mock('~/api', () => ({

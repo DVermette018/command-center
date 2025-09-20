@@ -31,3 +31,21 @@ export function createMockApiResponse<T>(data: T, status = 'success') {
     error: null
   }
 }
+
+export function mockSuccessfulFetch(data: any) {
+  return vi.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve(data)
+  })
+}
+
+export function mockApiResponse(data: any, options = {}) {
+  return {
+    data,
+    isLoading: false,
+    error: null,
+    status: 'success',
+    ...options
+  }
+}

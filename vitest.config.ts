@@ -9,8 +9,10 @@ export default defineConfig({
       '~': resolve(__dirname, './app'),
       '~~': resolve(__dirname, '.'),
       '@': resolve(__dirname, './app'),
+      '~/': resolve(__dirname, './'),
       '~~/': resolve(__dirname, './'),
-      '@@/': resolve(__dirname, './')
+      '@@/': resolve(__dirname, './'),
+      '~/test': resolve(__dirname, './test')
     }
   },
   test: {

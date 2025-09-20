@@ -9,9 +9,15 @@ describe('useDashboard', () => {
     resetNuxtMocks()
     vi.clearAllMocks()
     
-    // Reset the shared state
-    const dashboard = useDashboard()
-    dashboard.isNotificationsSlideoverOpen.value = false
+    // Reset the shared composable by clearing the createSharedComposable cache
+    try {
+      const dashboard = useDashboard()
+      if (dashboard && dashboard.isNotificationsSlideoverOpen) {
+        dashboard.isNotificationsSlideoverOpen.value = false
+      }
+    } catch (error) {
+      // Ignore errors during reset - composable might not be initialized yet
+    }
   })
 
   it('initializes with correct default state', () => {

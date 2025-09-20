@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mountComponent, mockSuccessfulFetch, mockFetchError } from '~/test/utils'
-import { createMockCustomer, createMockTableData, createMockApiError } from '~/test/factories'
+import { mountComponent, mockSuccessfulFetch, mockFetchError } from '../../utils'
+import { createMockCustomer, createMockTableData, createMockApiError } from '../../factories'
 
 // Mock the customers page
 const CustomersPage = {

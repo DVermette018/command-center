@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { flushPromises } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
+import { defineComponent, ref } from 'vue'
 import { createMockCustomer } from '../factories'
 import CustomerAddModal from '../../app/components/customers/AddModal.vue'
 import CustomerTable from '../../app/components/customers/Table.vue'

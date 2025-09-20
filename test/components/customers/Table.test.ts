@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { createMockCustomer } from '~/test/factories'
-import { mockApiResponse } from '~/test/utils'
-import CustomersTable from '~/app/components/customers/Table.vue'
+import { createMockCustomer } from '../../factories'
+import { mockApiResponse } from '../../utils'
+import CustomersTable from '~/components/customers/Table.vue'
 
 // Mocks
 const mockCustomers = [
-  createMockCustomer({ 
+  createMockCustomer({
     businessProfile: { businessName: 'Acme Corp' },
     status: 'ACTIVE'
   }),
-  createMockCustomer({ 
+  createMockCustomer({
     businessProfile: { businessName: 'Globex Inc' },
     status: 'LEAD'
   })
@@ -159,7 +159,7 @@ describe('CustomersTable', () => {
   it('has proper keyboard navigation', async () => {
     const rows = wrapper.findAll('tr')
     expect(rows.length).toBeGreaterThan(0)
-    
+
     // First row should be navigable
     await rows[0].trigger('keydown.enter')
     expect(wrapper.emitted('navigate')).toBeTruthy()

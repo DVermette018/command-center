@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mockFetchResponse, mockFetchError } from '~/test/utils.ts'
-import { createMockCustomer, createMockApiResponse, createMockTableData } from '~/test/factories'
+import { mockFetchResponse, mockFetchError } from '../utils'
+import { createMockCustomer, createMockApiResponse, createMockTableData } from '../factories'
 
 // Mock API client
 class CustomersAPI {

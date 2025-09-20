@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref } from 'vue'
-import HomeStats from '~/app/components/home/HomeStats.vue'
+import HomeStats from '~/components/home/HomeStats.vue'
 import type { Period, Range, Stat } from '~/types'
 
 // Mock the API response
@@ -37,14 +37,14 @@ const createWrapper = (props: { period: Period; range: Range }) => {
     props,
     global: {
       stubs: {
-        UPageGrid: { 
+        UPageGrid: {
           template: '<div data-testid="page-grid" class="grid"><slot /></div>',
           props: ['class']
         },
-        UPageCard: { 
+        UPageCard: {
           template: `
-            <div data-testid="page-card" 
-                 :data-icon="icon" 
+            <div data-testid="page-card"
+                 :data-icon="icon"
                  :data-title="title"
                  :data-to="to"
                  @click="$emit('click')">
@@ -54,7 +54,7 @@ const createWrapper = (props: { period: Period; range: Range }) => {
           props: ['icon', 'title', 'ui', 'class', 'to', 'variant'],
           emits: ['click']
         },
-        UBadge: { 
+        UBadge: {
           template: '<span data-testid="badge" :data-color="color" :class="variant"><slot /></span>',
           props: ['color', 'class', 'variant']
         }
@@ -78,7 +78,7 @@ const createMockStats = (): Stat[] => [
   },
   {
     title: 'Conversions',
-    key: 'conversions', 
+    key: 'conversions',
     icon: 'i-lucide-chart-pie',
     value: 45,
     variation: -5
@@ -102,7 +102,7 @@ const createMockStats = (): Stat[] => [
 describe('HomeStats', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     // Default mock for useAsyncData
     mockAsyncData.mockReturnValue({
       data: ref(createMockStats()),
@@ -118,7 +118,7 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const grid = wrapper.find('[data-testid="page-grid"]')
       expect(grid.exists()).toBe(true)
       expect(grid.classes()).toContain('lg:grid-cols-4')
@@ -129,28 +129,28 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const cards = wrapper.findAll('[data-testid="page-card"]')
       expect(cards.length).toBe(4)
     })
 
     it('displays correct stat titles and icons', () => {
       const wrapper = createWrapper({
-        period: 'daily', 
+        period: 'daily',
         range: createMockRange()
       })
-      
+
       const cards = wrapper.findAll('[data-testid="page-card"]')
-      
+
       expect(cards[0].attributes('data-title')).toBe('Customers')
       expect(cards[0].attributes('data-icon')).toBe('i-lucide-users')
-      
+
       expect(cards[1].attributes('data-title')).toBe('Conversions')
       expect(cards[1].attributes('data-icon')).toBe('i-lucide-chart-pie')
-      
+
       expect(cards[2].attributes('data-title')).toBe('Revenue')
       expect(cards[2].attributes('data-icon')).toBe('i-lucide-circle-dollar-sign')
-      
+
       expect(cards[3].attributes('data-title')).toBe('Orders')
       expect(cards[3].attributes('data-icon')).toBe('i-lucide-shopping-cart')
     })
@@ -160,7 +160,7 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const statValues = wrapper.findAll('.text-2xl.font-semibold')
       expect(statValues[0].text()).toBe('150')
       expect(statValues[1].text()).toBe('45')
@@ -173,21 +173,21 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const badges = wrapper.findAll('[data-testid="badge"]')
-      
+
       // Positive variation (customers: +25%)
       expect(badges[0].attributes('data-color')).toBe('success')
       expect(badges[0].text()).toBe('+25%')
-      
+
       // Negative variation (conversions: -5%)
       expect(badges[1].attributes('data-color')).toBe('error')
       expect(badges[1].text()).toBe('-5%')
-      
+
       // Positive variation (revenue: +15%)
       expect(badges[2].attributes('data-color')).toBe('success')
       expect(badges[2].text()).toBe('+15%')
-      
+
       // Positive variation (orders: +8%)
       expect(badges[3].attributes('data-color')).toBe('success')
       expect(badges[3].text()).toBe('+8%')
@@ -201,7 +201,7 @@ describe('HomeStats', () => {
         period: 'weekly',
         range
       })
-      
+
       expect(mockAsyncData).toHaveBeenCalledWith(
         'stats',
         expect.any(Function),
@@ -217,16 +217,16 @@ describe('HomeStats', () => {
 
     it('calls API with correct parameters', async () => {
       const range = createMockRange()
-      
+
       // Get the async data function that was passed to useAsyncData
       createWrapper({ period: 'monthly', range })
-      
+
       const asyncDataCall = mockAsyncData.mock.calls[0]
       const fetchFunction = asyncDataCall[1]
-      
+
       // Execute the fetch function
       await fetchFunction()
-      
+
       expect(mockApi.customers.getPeriodVariationByStatus).toHaveBeenCalledWith({
         status: 'ACTIVE',
         period: 'monthly',
@@ -239,14 +239,14 @@ describe('HomeStats', () => {
 
     it('maps API response to stats structure correctly', async () => {
       const range = createMockRange()
-      
+
       createWrapper({ period: 'daily', range })
-      
+
       const asyncDataCall = mockAsyncData.mock.calls[0]
       const fetchFunction = asyncDataCall[1]
-      
+
       const result = await fetchFunction()
-      
+
       expect(result).toEqual([
         expect.objectContaining({
           title: 'Customers',
@@ -279,7 +279,7 @@ describe('HomeStats', () => {
     it('provides default empty array when data is loading', () => {
       const defaultFunction = mockAsyncData.mock.calls[0][2].default
       const result = defaultFunction()
-      
+
       expect(result).toEqual([])
     })
   })
@@ -292,12 +292,12 @@ describe('HomeStats', () => {
         error: ref(null),
         refresh: vi.fn()
       })
-      
+
       const wrapper = createWrapper({
         period: 'daily',
         range: createMockRange()
       })
-      
+
       // Should render without crashing during loading
       expect(wrapper.find('[data-testid="page-grid"]').exists()).toBe(true)
     })
@@ -309,12 +309,12 @@ describe('HomeStats', () => {
         error: ref(null),
         refresh: vi.fn()
       })
-      
+
       const wrapper = createWrapper({
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const cards = wrapper.findAll('[data-testid="page-card"]')
       expect(cards.length).toBe(0)
     })
@@ -328,25 +328,25 @@ describe('HomeStats', () => {
         error: ref(new Error('API Error')),
         refresh: vi.fn()
       })
-      
+
       const wrapper = createWrapper({
         period: 'daily',
         range: createMockRange()
       })
-      
+
       // Should render without crashing on error
       expect(wrapper.find('[data-testid="page-grid"]').exists()).toBe(true)
     })
 
     it('continues to work if API call fails', async () => {
       mockApi.customers.getPeriodVariationByStatus.mockRejectedValue(new Error('Network error'))
-      
+
       const range = createMockRange()
       createWrapper({ period: 'daily', range })
-      
+
       const asyncDataCall = mockAsyncData.mock.calls[0]
       const fetchFunction = asyncDataCall[1]
-      
+
       // Should not throw error
       await expect(fetchFunction()).rejects.toThrow('Network error')
     })
@@ -358,10 +358,10 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const watchConfig = mockAsyncData.mock.calls[0][2]
       expect(watchConfig.watch).toHaveLength(2)
-      
+
       // The watch functions should be reactive to props changes
       expect(watchConfig.watch[0]).toBeInstanceOf(Function)
       expect(watchConfig.watch[1]).toBeInstanceOf(Function)
@@ -372,7 +372,7 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       // Verify that changing props would trigger the watchers
       const watchConfig = mockAsyncData.mock.calls[0][2]
       expect(watchConfig.watch).toBeDefined()
@@ -383,13 +383,13 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       // Simulate prop change by updating the component
       await wrapper.setProps({
         period: 'weekly',
         range: createMockRange()
       })
-      
+
       // The watch should trigger new data fetch
       expect(wrapper.vm).toBeDefined()
     })
@@ -403,7 +403,7 @@ describe('HomeStats', () => {
           range: createMockRange()
         }
       })
-      
+
       // Test the formatCurrency function
       const result = component.vm.formatCurrency(12500)
       expect(result).toBe('$12,500')
@@ -416,7 +416,7 @@ describe('HomeStats', () => {
           range: createMockRange()
         }
       })
-      
+
       const result = component.vm.formatCurrency(0)
       expect(result).toBe('$0')
     })
@@ -428,7 +428,7 @@ describe('HomeStats', () => {
           range: createMockRange()
         }
       })
-      
+
       const result = component.vm.formatCurrency(1234567)
       expect(result).toBe('$1,234,567')
     })
@@ -440,7 +440,7 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const customerCard = wrapper.findAll('[data-testid="page-card"]')[0]
       expect(customerCard.attributes('data-to')).toBe('/customers')
     })
@@ -450,10 +450,10 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const firstCard = wrapper.find('[data-testid="page-card"]')
       await firstCard.trigger('click')
-      
+
       // Should not throw error on click
       expect(firstCard.exists()).toBe(true)
     })
@@ -465,9 +465,9 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const cards = wrapper.findAll('[data-testid="page-card"]')
-      
+
       cards.forEach(card => {
         const title = card.attributes('data-title')
         expect(title).toBeTruthy()
@@ -480,9 +480,9 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const cards = wrapper.findAll('[data-testid="page-card"]')
-      
+
       cards.forEach(card => {
         const icon = card.attributes('data-icon')
         expect(icon).toBeTruthy()
@@ -495,9 +495,9 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const badges = wrapper.findAll('[data-testid="badge"]')
-      
+
       badges.forEach(badge => {
         const color = badge.attributes('data-color')
         expect(['success', 'error']).toContain(color)
@@ -511,9 +511,9 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       const config = mockAsyncData.mock.calls[0][2]
-      
+
       expect(config).toHaveProperty('watch')
       expect(config).toHaveProperty('default')
       expect(config.default).toBeInstanceOf(Function)
@@ -522,7 +522,7 @@ describe('HomeStats', () => {
     it('provides efficient default value', () => {
       const config = mockAsyncData.mock.calls[0][2]
       const defaultValue = config.default()
-      
+
       expect(Array.isArray(defaultValue)).toBe(true)
       expect(defaultValue.length).toBe(0)
     })
@@ -532,7 +532,7 @@ describe('HomeStats', () => {
         period: 'daily',
         range: createMockRange()
       })
-      
+
       // Verify baseStats is defined and structured correctly
       expect(wrapper.vm.baseStats).toBeDefined()
       expect(Array.isArray(wrapper.vm.baseStats)).toBe(true)
