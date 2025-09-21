@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount, VueWrapper } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import DeleteModal from '~/components/customers/DeleteModal.vue'
 
 describe('CustomersDeleteModal', () => {
-  let wrapper: ReturnType<typeof mount>
+  let wrapper: VueWrapper<InstanceType<typeof DeleteModal>>
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -24,9 +24,11 @@ describe('CustomersDeleteModal', () => {
     })
 
     const triggerSlot = wrapper.find('button')
+    await flushPromises()
     await triggerSlot.trigger('click')
 
     const modalTitle = wrapper.find('[data-testid="modal-title"]')
+    await flushPromises()
     expect(modalTitle.text()).toContain('Delete 1 customer')
   })
 

@@ -12,11 +12,23 @@ export function mountComponent<T extends Component>(component: T, options = {}) 
 }
 
 export function mockFetchResponse(data: any) {
-  return vi.fn().mockResolvedValue({ data })
+  const mockFetch = vi.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve(data),
+    text: () => Promise.resolve(JSON.stringify(data))
+  })
+  vi.mocked(global.fetch).mockResolvedValueOnce(mockFetch() as any)
+  vi.mocked(global.$fetch).mockResolvedValueOnce(data)
+  return mockFetch
 }
 
-export function mockFetchError(error: Error) {
-  return vi.fn().mockRejectedValue(error)
+export function mockFetchError(status: number, message: string) {
+  const error = new Error(message)
+  const mockFetch = vi.fn().mockRejectedValue(error)
+  vi.mocked(global.fetch).mockRejectedValueOnce(error)
+  vi.mocked(global.$fetch).mockRejectedValueOnce(error)
+  return mockFetch
 }
 
 export function getByTestId(wrapper: any, testId: string) {

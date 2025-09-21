@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
+import { ref } from 'vue'
 import { createMockProject, createMockUser } from '../../factories'
 import { mockApiResponse } from '../../utils'
 import ProjectsTable from '~/components/projects/Table.vue'
@@ -28,11 +29,11 @@ const mockProjects = [
 
 const mockApiClient = {
   projects: {
-    getAll: vi.fn().mockImplementation(() => ({
-      data: {
+    useGetAllQuery: vi.fn(() => ({
+      data: ref({
         data: mockProjects,
         pagination: { total: 2 }
-      },
+      }),
       isLoading: ref(false),
       status: ref('success'),
       error: ref(null),
@@ -59,7 +60,7 @@ vi.mock('@nuxt/ui', async () => {
 
 describe('ProjectsTable', () => {
   const customerId = 'test-customer-id'
-  let wrapper: ReturnType<typeof mount>
+  let wrapper: ReturnType<typeof mount> | undefined
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -75,7 +76,10 @@ describe('ProjectsTable', () => {
   })
 
   afterEach(() => {
-    wrapper.unmount()
+    if (wrapper) {
+      wrapper.unmount()
+      wrapper = undefined
+    }
   })
 
   // Data Rendering Tests

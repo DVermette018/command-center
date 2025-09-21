@@ -53,8 +53,18 @@ export function createMockCustomer(overrides: Partial<Customer> = {}): Customer 
 
 // Project factory
 export function createMockProject(overrides: Partial<Project> = {}): Project {
-  const startDate = faker.date.future()
+  // Create a mix of past, current, and future projects to simulate real scenarios
+  const isCompletedProject = faker.datatype.boolean(0.3) // 30% chance of completed project
+  const startDate = isCompletedProject 
+    ? faker.date.past({ years: 1 }) // Past start date for completed projects
+    : faker.date.recent({ days: 30 }) // Recent start date for ongoing projects
+  
   const targetEndDate = new Date(startDate.getTime() + (faker.number.int({ min: 30, max: 180 }) * 24 * 60 * 60 * 1000))
+  
+  // Generate actualEndDate only for completed projects, between startDate and targetEndDate
+  const actualEndDate = isCompletedProject 
+    ? faker.date.between({ from: startDate, to: targetEndDate })
+    : undefined
   
   return {
     id: faker.string.uuid(),
@@ -67,7 +77,7 @@ export function createMockProject(overrides: Partial<Project> = {}): Project {
     priority: faker.helpers.arrayElement(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
     startDate: startDate,
     targetEndDate: targetEndDate,
-    actualEndDate: faker.datatype.boolean() ? faker.date.between({ from: startDate, to: new Date() }) : undefined,
+    actualEndDate: actualEndDate,
     projectManager: {
       id: faker.string.uuid(),
       firstName: faker.person.firstName(),
@@ -184,13 +194,16 @@ export function createMockFormData(type: 'customer' | 'project' = 'customer', ov
   }
   
   // Project form data
+  const startDate = faker.date.future()
+  const targetEndDate = new Date(startDate.getTime() + (faker.number.int({ min: 30, max: 365 }) * 24 * 60 * 60 * 1000))
+  
   return {
     customerId: faker.string.uuid(),
     name: faker.company.buzzPhrase(),
     description: faker.lorem.paragraph(),
     type: faker.helpers.arrayElement(['WEBSITE', 'BRANDING', 'DEVELOPMENT']),
-    startDate: faker.date.future(),
-    targetEndDate: faker.date.future({ years: 1 }),
+    startDate: startDate,
+    targetEndDate: targetEndDate,
     projectManagerId: faker.string.uuid(),
     budget: faker.number.float({ min: 5000, max: 50000, fractionDigits: 2 }),
     currency: faker.helpers.arrayElement(['USD', 'MXN', 'EUR']),
@@ -199,11 +212,18 @@ export function createMockFormData(type: 'customer' | 'project' = 'customer', ov
 }
 
 // Table data factory
-export function createMockTableData(count = 5, type: 'customer' | 'project' = 'customer') {
-  if (type === 'project') {
-    return Array.from({ length: count }, () => createMockProject())
+export function createMockTableData<T>(factory: () => T, count = 5) {
+  const items = Array.from({ length: count }, () => factory())
+  return {
+    items,
+    pagination: {
+      page: 1,
+      limit: 10,
+      total: count,
+      totalPages: Math.ceil(count / 10)
+    },
+    success: true
   }
-  return Array.from({ length: count }, () => createMockCustomer())
 }
 
 // Validation error factory

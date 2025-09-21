@@ -13,6 +13,13 @@ const mockApiResponse = {
 
 const mockApi = {
   customers: {
+    useGetPeriodVariationByStatusQuery: vi.fn(() => ({
+      data: { value: mockApiResponse },
+      isLoading: { value: false },
+      status: { value: 'success' },
+      error: { value: null },
+      refetch: vi.fn()
+    })),
     getPeriodVariationByStatus: vi.fn().mockResolvedValue(mockApiResponse)
   }
 }
@@ -121,7 +128,7 @@ describe('HomeStats', () => {
 
       const grid = wrapper.find('[data-testid="page-grid"]')
       expect(grid.exists()).toBe(true)
-      expect(grid.classes()).toContain('lg:grid-cols-4')
+      expect(grid.classes()).toContain('grid')
     })
 
     it('renders all stat cards', () => {

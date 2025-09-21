@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount, flushPromises, VueWrapper } from '@vue/test-utils'
 import { createMockCustomer } from '../../factories'
 import { mockApiResponse } from '../../utils'
 import CustomersTable from '~/components/customers/Table.vue'
@@ -45,7 +45,7 @@ vi.mock('@nuxt/ui', async () => {
 })
 
 describe('CustomersTable', () => {
-  let wrapper: ReturnType<typeof mount>
+  let wrapper: VueWrapper<InstanceType<ReturnType<typeof mount>>>
 
   beforeEach(() => {
     vi.clearAllMocks()
