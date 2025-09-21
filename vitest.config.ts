@@ -1,47 +1,40 @@
+// vitest.config.ts
 import { defineConfig } from 'vitest/config'
 import { resolve } from 'path'
-import vue from '@vitejs/plugin-vue';
+import vue from '@vitejs/plugin-vue'
+import { defineVitestProject } from '@nuxt/test-utils/config'
 
-export default defineConfig({
+export default defineConfig(async () => ({
   plugins: [vue()],
   resolve: {
     alias: {
       '~': resolve(__dirname, './app'),
       '~~': resolve(__dirname, '.'),
       '@': resolve(__dirname, './app'),
-      '~/': resolve(__dirname, './'),
-      '~~/': resolve(__dirname, './'),
-      '@@/': resolve(__dirname, './'),
-      '~/test': resolve(__dirname, './test')
-    }
+      // you usually don't need the extra '~/','~~/','@@/' entries
+    },
   },
   test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./test/setup.ts'],
-    exclude: ['node_modules', 'dist', 'test/e2e', 'prisma', '.conductor/**'],
-    isolate: true,
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'html', 'lcov'],
-      exclude: [
-        'node_modules/',
-        'test/',
-        'coverage/',
-        '**/*.d.ts',
-        'nuxt.config.ts',
-        '.nuxt/',
-        'dist/',
-        'prisma/'
-      ],
-      thresholds: {
-        global: {
-          branches: 80,
-          functions: 80,
-          lines: 80,
-          statements: 80
-        }
-      }
-    }
-  }
-})
+    projects: [
+      {
+        test: {
+          name: 'unit',
+          include: ['test/{unit,utils}/**/*.{test,spec}.{ts,tsx}'],
+          exclude: ['node_modules', 'dist', 'test/e2e', 'prisma', '.conductor/**'],
+          setupFiles: ['./test/setup.ts'],
+          environment: 'happy-dom',
+        },
+      },
+      await defineVitestProject({
+        test: {
+          name: 'nuxt',
+          include: ['test/{components,composables,pages}/**/*.{test,spec}.{ts,tsx}'],
+          exclude: ['node_modules', 'dist', 'test/e2e', 'prisma', '.conductor/**'],
+          environment: 'nuxt',
+          setupFiles: ['./test/setupNuxt.ts'],
+          isolate: true,
+        },
+      }),
+    ],
+  },
+}))

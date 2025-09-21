@@ -7,7 +7,8 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@nuxt/icon',
     '@nuxt/image',
-    '@nuxtjs/mdc'
+    '@nuxtjs/mdc',
+    // '@nuxt/test-utils/module'
   ],
 
   devtools: {

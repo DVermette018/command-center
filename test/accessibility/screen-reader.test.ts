@@ -23,6 +23,7 @@ vi.mock('../../api', () => ({
   })
 }))
 
+
 vi.mock('#app', () => ({
   useToast: () => ({ add: vi.fn() })
 }))
@@ -75,11 +76,7 @@ function getAriaRole(element: Element): string {
   return element.getAttribute('role') || element.tagName.toLowerCase()
 }
 
-// Screen reader test component that includes common CRM patterns,
-// This component is used to test various accessibility features
-// and ensure that our suite is in compliance with WCAG 2.1 Level AA standards.
-// Once the suite tests this component, we can be confident that our application
-// meets the necessary accessibility requirements for screen reader users.
+// Screen reader test component that includes common CRM patterns
 const ScreenReaderTestApp = defineComponent({
   name: 'ScreenReaderTestApp',
   components: {
@@ -271,7 +268,6 @@ const ScreenReaderTestApp = defineComponent({
             data-testid="add-project-btn"
           >
             Add Project
-            {{customers.length}}
           </button>
 
           <div
@@ -329,6 +325,7 @@ const ScreenReaderTestApp = defineComponent({
 })
 
 describe('Screen Reader Accessibility Tests', () => {
+  // Properly type the wrapper variable
   let wrapper: VueWrapper<InstanceType<typeof ScreenReaderTestApp>>
 
   beforeEach(() => {
@@ -480,11 +477,11 @@ describe('Screen Reader Accessibility Tests', () => {
     })
 
     it('has proper landmarks and regions', () => {
-      const landmarks: HTMLElement[] = wrapper.element.querySelectorAll('[role="banner"], [role="main"], [role="navigation"], [role="region"]')
+      const landmarks = wrapper.element.querySelectorAll('[role="banner"], [role="main"], [role="navigation"], [role="region"]')
       expect(landmarks.length).toBeGreaterThan(0)
 
       // Each landmark should have accessible name
-      landmarks.forEach(landmark => {
+      landmarks.forEach((landmark: HTMLElement) => {
         expect(hasAccessibleName(landmark)).toBe(true)
       })
     })
@@ -744,9 +741,8 @@ describe('Screen Reader Accessibility Tests', () => {
       // Project button should be disabled when no customers
       wrapper.vm.customers = []
       await flushPromises()
-
       const projectButton = wrapper.find('[data-testid="add-project-btn"]')
-      console.log(projectButton.html())
+
       expect(projectButton.attributes('disabled')).toBeDefined()
       expect(projectButton.attributes('aria-describedby')).toBe('project-disabled-desc')
 
@@ -760,9 +756,10 @@ describe('Screen Reader Accessibility Tests', () => {
       // Trigger a successful customer creation
       wrapper.vm.showCustomerModal = true
       await flushPromises()
+
       const modal = wrapper.findComponent(CustomerAddModal)
 
-      modal.vm.$emit('customer-created', { id: '3' })
+      await modal.vm.$emit('customer-created', { id: '3' })
       await flushPromises()
 
       const notifications = wrapper.find('[data-testid="notifications"]')
@@ -808,11 +805,11 @@ describe('Screen Reader Accessibility Tests', () => {
     })
 
     it('ensures all functionality is keyboard accessible', () => {
-      const interactiveElements: HTMLElement[] = wrapper.element.querySelectorAll(
+      const interactiveElements = wrapper.element.querySelectorAll(
         'button, input, select, textarea, a[href], [role="button"], [tabindex="0"]'
       )
 
-      interactiveElements.forEach(element => {
+      interactiveElements.forEach((element: HTMLElement) => {
         // Should be keyboard accessible (not tabindex="-1" unless managed focus)
         const tabIndex = element.getAttribute('tabindex')
         if (tabIndex !== null) {
