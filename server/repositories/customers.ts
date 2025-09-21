@@ -184,7 +184,6 @@ export const register = (db: PrismaClient) => ({
   },
 
   getById: async (id: string): Promise<CustomerDTO> => {
-    console.log(`Fetching customer by ID: ${id}`)
     try {
       const c = await db.customer.findUnique({
         where: { id },
@@ -522,7 +521,7 @@ export const register = (db: PrismaClient) => ({
       await db.customer.delete({
         where: { id }
       })
-      
+
       console.log(`Deleted customer with ID ${id}`)
       return {
         success: true,

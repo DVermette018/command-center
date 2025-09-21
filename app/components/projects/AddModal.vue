@@ -63,18 +63,18 @@ const targetEndDateCalendar = computed({
 const projectManagers = ref<SelectOption[]>([])
 
 // Use query hook for loading users
-const { data: usersData, error: usersError } = api.users.useGetAllByRolesQuery({ 
-  pageIndex: 1, 
-  pageSize: 100, 
-  roles: ['PROJECT_MANAGER', 'DEVELOPER', 'DESIGNER'] 
+const { data: usersData, error: usersError } = api.users.useGetAllByRolesQuery({
+  pageIndex: 1,
+  pageSize: 100,
+  roles: ['PROJECT_MANAGER', 'DEVELOPER', 'DESIGNER']
 })
 
 // Watch for data changes and update projectManagers
 watch(usersData, (data) => {
   if (data?.data) {
-    projectManagers.value = data.data.map((u: ListUserDTO) => ({ 
-      label: `${u.firstName} ${u.lastName}`, 
-      value: u.id 
+    projectManagers.value = data.data.map((u: ListUserDTO) => ({
+      label: `${u.firstName} ${u.lastName}`,
+      value: u.id
     }))
   }
 }, { immediate: true })
@@ -159,7 +159,7 @@ const onError = (error: any): void => {
 // Submit handler
 const onSubmit = async (event: FormSubmitEvent<CreateProjectDTO>): Promise<void> => {
   console.log('Form submitted with data:', event.data)
-  
+
   createProjectMutation.mutate({
     customerId: event.data.customerId,
     name: event.data.name,
@@ -216,6 +216,7 @@ watch(open, (newValue) => {
     <UButton
       icon="i-lucide-plus"
       label="Nuevo Proyecto"
+      data-testid="add-project-button"
       @click="open = true"
     />
 
