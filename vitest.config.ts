@@ -19,7 +19,7 @@ export default defineConfig(async () => ({
       {
         test: {
           name: 'unit',
-          include: ['test/{unit,utils}/**/*.{test,spec}.{ts,tsx}'],
+          include: ['test/{unit,utils,integration}/**/*.{test,spec}.{ts,tsx}'],
           exclude: ['node_modules', 'dist', 'test/e2e', 'prisma', '.conductor/**'],
           setupFiles: ['./test/setup.ts'],
           environment: 'happy-dom',

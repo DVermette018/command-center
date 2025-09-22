@@ -132,7 +132,7 @@ export enum AnthropicErrorType {
  * Structured error information for Anthropic service
  */
 export interface AnthropicErrorDetails {
-  /** Error type classification */
+    /** Error type classification */
   type: AnthropicErrorType
   /** Human-readable error message */
   message: string
@@ -303,6 +303,6 @@ export function isRetryableError(errorDetails: AnthropicErrorDetails): boolean {
     AnthropicErrorType.RATE_LIMIT,
     AnthropicErrorType.API_ERROR
   ]
-  
+
   return errorDetails.retryable && retryableTypes.includes(errorDetails.type)
 }
