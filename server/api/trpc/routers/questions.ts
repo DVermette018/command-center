@@ -11,6 +11,8 @@ import {
   projectSetupProgressSchema,
   type PlanType
 } from '~~/dto/question'
+import { anthropicService } from '../../../server/services/anthropic'
+import type { PromptContext } from '../../../types/anthropic'
 
 export const registerRoutes = () => ({
   getTemplatesForPlan: baseProcedure
@@ -125,47 +127,83 @@ export const registerRoutes = () => ({
     }),
 })
 
-// Helper function to generate Lovable prompt (implement your AI logic here)
+/**
+ * Generate enhanced Lovable prompt using Anthropic service
+ * Transforms user answers into an AI-enhanced prompt for development
+ */
 async function generateLovablePrompt(answers: any[], project: any): Promise<string> {
-  // Structure answers by question code
-  const structuredAnswers = answers.reduce((acc, item) => {
-    if (item.questionCode) {
-      acc[item.questionCode] = item.answer
+  try {
+    // Structure answers by question code
+    const structuredAnswers = answers.reduce((acc, item) => {
+      if (item.questionCode) {
+        acc[item.questionCode] = item.answer
+      }
+      return acc
+    }, {} as Record<string, any>)
+
+    // Create base prompt with structured data
+    const basePrompt = `
+      Project Type: ${project.planType}
+
+      Business Context:
+      - Target Audience: ${structuredAnswers.target_audience || 'Not specified'}
+      - Unique Value: ${structuredAnswers.unique_value || 'Not specified'}
+      - Business Personality: ${structuredAnswers.business_personality || 'Not specified'}
+      - Competitors: ${structuredAnswers.competitors || 'Not specified'}
+
+      Project Goals:
+      - Primary Goal: ${structuredAnswers.primary_goal || 'Not specified'}
+      - Success Metrics: ${structuredAnswers.success_metrics || 'Not specified'}
+      - Problems Solving: ${structuredAnswers.problems_solving || 'Not specified'}
+      - Must Have Features: ${JSON.stringify(structuredAnswers.must_have_features || [])}
+
+      Design Preferences:
+      - Visual Style: ${JSON.stringify(structuredAnswers.visual_style || [])}
+      - Color Emotions: ${structuredAnswers.color_emotions || 'Not specified'}
+      - Inspiration Elements: ${JSON.stringify(structuredAnswers.inspiration_elements || [])}
+      - Avoid Elements: ${structuredAnswers.avoid_elements || 'Not specified'}
+
+      Additional Context:
+      - Timeline: ${structuredAnswers.timeline_urgency || 'Not specified'}
+      - Budget Priorities: ${structuredAnswers.budget_priorities || 'Not specified'}
+      - Future Vision: ${structuredAnswers.future_vision || 'Not specified'}
+      - Additional Notes: ${structuredAnswers.anything_else || 'Not specified'}
+    `.trim()
+
+    // Build context for prompt enhancement
+    const context: PromptContext = {
+      projectType: project.planType,
+      industry: structuredAnswers.business_personality,
+      timeline: structuredAnswers.timeline_urgency,
+      audience: structuredAnswers.target_audience,
+      metadata: {
+        projectId: project.id,
+        projectName: project.name,
+        totalAnswers: answers.length
+      }
     }
-    return acc
-  }, {} as Record<string, any>)
 
-  // Create a structured prompt for Lovable
-  const prompt = `
-    Project Type: ${project.planType}
+    // Use Anthropic service to enhance the prompt
+    const enhancedPrompt = await anthropicService.enhancePrompt({
+      originalPrompt: basePrompt,
+      context,
+      options: {
+        style: 'technical',
+        focus: ['clarity', 'detail', 'structure'],
+        includeExamples: true,
+        customInstructions: 'Transform this into a comprehensive development prompt for Lovable.dev that will help create a modern, user-focused application. Include specific technical requirements and implementation guidelines.'
+      }
+    })
 
-    Business Context:
-    - Target Audience: ${structuredAnswers.target_audience || 'Not specified'}
-    - Unique Value: ${structuredAnswers.unique_value || 'Not specified'}
-    - Business Personality: ${structuredAnswers.business_personality || 'Not specified'}
-    - Competitors: ${structuredAnswers.competitors || 'Not specified'}
+    return enhancedPrompt.enhancedPrompt
 
-    Project Goals:
-    - Primary Goal: ${structuredAnswers.primary_goal || 'Not specified'}
-    - Success Metrics: ${structuredAnswers.success_metrics || 'Not specified'}
-    - Problems Solving: ${structuredAnswers.problems_solving || 'Not specified'}
-    - Must Have Features: ${JSON.stringify(structuredAnswers.must_have_features || [])}
-
-    Design Preferences:
-    - Visual Style: ${JSON.stringify(structuredAnswers.visual_style || [])}
-    - Color Emotions: ${structuredAnswers.color_emotions || 'Not specified'}
-    - Inspiration Elements: ${JSON.stringify(structuredAnswers.inspiration_elements || [])}
-    - Avoid Elements: ${structuredAnswers.avoid_elements || 'Not specified'}
-
-    Additional Context:
-    - Timeline: ${structuredAnswers.timeline_urgency || 'Not specified'}
-    - Budget Priorities: ${structuredAnswers.budget_priorities || 'Not specified'}
-    - Future Vision: ${structuredAnswers.future_vision || 'Not specified'}
-    - Additional Notes: ${structuredAnswers.anything_else || 'Not specified'}
-  `.trim()
-
-  // Here you would call Anthropic API to enhance this prompt
-  // const enhancedPrompt = await callAnthropicAPI(prompt)
-
-  return prompt
+  } catch (error) {
+    // Log the error but don't fail the entire operation
+    console.error('Failed to enhance prompt with AI:', error)
+    
+    // Fallback to basic prompt structure
+    const fallbackPrompt = `Create a ${project.planType} application with the following requirements based on user feedback:\n\n${answers.map(a => `- ${a.questionText}: ${a.answer}`).join('\n')}`
+    
+    return fallbackPrompt
+  }
 }

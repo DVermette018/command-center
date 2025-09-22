@@ -95,7 +95,7 @@ const currentQuestions = computed(() => {
 })
 
 const progress = computed(() => {
-  const totalSections = questionTemplates.value.length
+  const totalSections = questionTemplates.value.length || 1
   const completedSections = currentSectionIndex.value
   return Math.ceil((completedSections / totalSections) * 100)
 })
@@ -139,16 +139,13 @@ const {
 // Process templates reactively
 watch(templates, (newTemplates) => {
   if (newTemplates?.length) {
-    console.log('Processing templates:', newTemplates)
     questionTemplates.value = [...newTemplates].sort((a: ListQuestionTemplateDTO, b: ListQuestionTemplateDTO) => a.order - b.order)
-    console.log('Sorted templates:', questionTemplates.value)
   }
 }, { immediate: true })
 
 // Process existing answers reactively
 watch(existingAnswers, (answers) => {
   if (answers?.length) {
-    console.log('Processing existing answers:', answers)
     answers.forEach((answer: ListAnswerDTO) => {
       projectAnswers.value.set(answer.questionId, answer.answer)
     })

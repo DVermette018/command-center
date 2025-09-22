@@ -58,6 +58,21 @@ pnpm preview
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
+## AI Services
+
+### Anthropic Integration
+Our application features a robust Anthropic AI service with advanced prompt enhancement capabilities. 
+
+Key Features:
+- Comprehensive prompt transformation
+- Advanced error handling
+- Configurable AI model selection
+- Detailed service monitoring
+
+Documentation:
+- [Anthropic Service Usage](/server/services/ANTHROPIC_SERVICE.md)
+- [Anthropic Service Architecture](/server/services/ANTHROPIC_SERVICE_ARCHITECTURE.md)
+
 ## Renovate integration
 
 Install [Renovate GitHub app](https://github.com/apps/renovate/installations/select_target) on your repository and you are good to go.

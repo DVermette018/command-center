@@ -230,12 +230,6 @@ vi.mock('~/api', () => ({
         error: { value: null }
       })),
       create: () => ({ mutate: vi.fn(), isLoading: false, error: null }),
-      getAll: () => ({
-        data: ref([]),
-        isLoading: false,
-        error: null,
-        refetch: vi.fn()
-      }),
       getPeriodVariationByStatus: vi.fn(() => ({
         currentPeriod: 150,
         previousPeriod: 120,

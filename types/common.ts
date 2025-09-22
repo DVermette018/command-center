@@ -37,3 +37,10 @@ export type FlatListItem<T = any> = FlatListHeader | FlatListElement<T> | FlatLi
 export type FlatList<T = any> = FlatListItem<T>[]
 
 export type WithId<T, ID = number> = T & { id: ID }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyObject = Record<string, any>
+export type UnknownObject = Record<string, unknown>
+export type EmptyObject = Record<string, never>
+export type SuccessNoContent = EmptyObject
+export type GenericObject = UnknownObject | EmptyObject | AnyObject
